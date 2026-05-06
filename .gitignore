@@ -1,0 +1,16 @@
+# Archivos de variables de entorno (contienen contraseñas y claves secretas)
+.env
+.env.local
+.env.production
+
+# Archivos de configuración con claves de API
+# IMPORTANTE: supabase-config.js contiene tu Anon Key y URL de Supabase
+# Descomenta la siguiente línea si no quieres subir ese archivo:
+# supabase-config.js
+
+# Dependencias de Node.js (si en el futuro agregas un backend)
+node_modules/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
