@@ -4,9 +4,19 @@ const cartCountElement = document.querySelector('.cart-count');
 const addToCartButtons = document.querySelectorAll('.add-to-cart');
 
 addToCartButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
+    button.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation(); // Evita que se dispare el evento del hover en la tarjeta si lo hubiera
+
+        // Verificar si el usuario está autenticado en Supabase
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (!session) {
+            alert("Debes iniciar sesión para poder comprar.");
+            window.location.href = '../login/login.html';
+            return;
+        }
+
         cartCount++;
         cartCountElement.textContent = cartCount;
         
