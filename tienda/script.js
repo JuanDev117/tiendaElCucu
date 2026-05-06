@@ -1,13 +1,16 @@
 // ─── Config backend ──────────────────────────────────────────
-const API_URL = 'http://localhost:3001';
+const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? 'http://127.0.0.1:3001'
+    : '';
+const supabaseDb = window.cucuSupabaseClient;
 
 // Funcionalidad del carrito de compras
 let cart = [];
+let productos = [];
 const deliveryCost = 3000;
 
 // Elementos del DOM
 const cartCountElement = document.querySelector('.cart-count');
-const addToCartButtons = document.querySelectorAll('.add-to-cart');
 const cartOverlay = document.getElementById('cart-overlay');
 const cartModal = document.getElementById('cart-modal');
 const cartBtn = document.querySelector('.cart-btn');
@@ -20,58 +23,142 @@ const shippingCostElement = document.getElementById('shipping-cost');
 const totalPriceElement = document.getElementById('total-price');
 const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
 const checkoutBtn = document.getElementById('checkout-btn');
+const productsGrid = document.querySelector('.products-grid');
+
+// ─── Cargar productos al iniciar ──────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    cargarProductos();
+    actualizarNavbar();
+});
+
+// ─── Cargar productos del backend ────────────────────────
+async function cargarProductos() {
+    try {
+        productos = await obtenerProductosActivos();
+        renderizarProductos();
+        setupAddToCartButtons();
+    } catch (err) {
+        console.error('Error al cargar productos:', err);
+        // Si hay error, mantener los productos del HTML estático
+    }
+}
+
+async function obtenerProductosActivos() {
+    try {
+        const response = await fetch(`${API_URL}/api/productos`);
+        if (!response.ok) throw new Error('Backend no disponible');
+        return await response.json();
+    } catch (backendError) {
+        if (!supabaseDb) throw backendError;
+
+        const { data, error } = await supabaseDb
+            .from('productos')
+            .select('*')
+            .eq('estado', 'activo')
+            .gt('stock', 0)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+}
+
+// ─── Renderizar grid de productos ────────────────────────
+function renderizarProductos() {
+    if (productos.length === 0) {
+        console.warn('No hay productos para mostrar');
+        productsGrid.innerHTML = `
+            <div class="empty-products">
+                No hay productos activos disponibles.
+            </div>
+        `;
+        return;
+    }
+
+    productsGrid.innerHTML = productos.map(producto => `
+        <div class="product-card" data-producto-id="${producto.id}">
+            <div class="product-image-placeholder">
+                ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : '<div style="width:100%; height:200px; background:var(--bg-secondary);"></div>'}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${producto.categoria}</span>
+                <h3 class="product-name">${producto.nombre}</h3>
+                <div class="product-bottom">
+                    <span class="product-price">$${parseInt(producto.precio).toLocaleString('es-CO')}</span>
+                    <button class="add-to-cart" aria-label="Agregar al carrito" data-producto-id="${producto.id}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ─── Setup botones agregar al carrito ────────────────────
+function setupAddToCartButtons() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', agregarAlCarrito);
+    });
+}
+
+// ─── Agregar al carrito ──────────────────────────────────
+async function agregarAlCarrito(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Verificar si el usuario está autenticado
+    const session = sessionStorage.getItem('cucu_token');
+    
+    if (!session) {
+        alert("Debes iniciar sesión para poder comprar.");
+        window.location.href = '/login/login.html';
+        return;
+    }
+
+    const button = e.target.closest('.add-to-cart');
+    const productoId = button.dataset.productoId;
+    const producto = productos.find(p => p.id == productoId);
+
+    if (!producto) {
+        alert('Producto no encontrado');
+        return;
+    }
+
+    // Verificar si ya existe en el carrito
+    const existingItem = cart.find(item => item.id === producto.id);
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            id: producto.id,
+            title: producto.nombre,
+            price: parseInt(producto.precio),
+            image: producto.imagen || '',
+            quantity: 1
+        });
+    }
+
+    updateCartUI();
+
+    // Feedback visual en el botón
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    button.style.background = 'var(--green-primary)';
+    button.style.color = '#000';
+    
+    setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.style.background = '';
+        button.style.color = '';
+    }, 1000);
+}
 
 // Utilidad para formatear moneda
 const formatPrice = (price) => {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(price);
 };
-
-// Agregar al carrito
-addToCartButtons.forEach(button => {
-    button.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // Evita que se dispare el evento del hover en la tarjeta si lo hubiera
-
-        // Verificar si el usuario está autenticado (sessionStorage)
-        const session = sessionStorage.getItem('cucu_token');
-        
-        if (!session) {
-            alert("Debes iniciar sesión para poder comprar.");
-            window.location.href = '/login/login.html';
-            return;
-        }
-
-        // Obtener detalles del producto desde la tarjeta
-        const productCard = e.target.closest('.product-card');
-        const title = productCard.querySelector('.product-name').textContent;
-        const priceText = productCard.querySelector('.product-price').textContent;
-        const price = parseInt(priceText.replace(/[^0-9]/g, ''), 10);
-        const image = productCard.querySelector('img').src;
-        const id = title.replace(/\s+/g, '-').toLowerCase();
-
-        // Verificar si ya existe en el carrito
-        const existingItem = cart.find(item => item.id === id);
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({ id, title, price, image, quantity: 1 });
-        }
-
-        updateCartUI();
-
-        // Feedback visual en el botón
-        const originalHTML = button.innerHTML;
-        button.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-        button.style.background = 'var(--green-primary)';
-        button.style.color = '#000';
-        
-        setTimeout(() => {
-            button.innerHTML = originalHTML;
-            button.style.background = '';
-            button.style.color = '';
-        }, 1000);
-    });
-});
 
 // Actualizar UI del carrito
 function updateCartUI() {
@@ -116,7 +203,7 @@ function updateCartUI() {
 
 // Funciones globales para el HTML renderizado dinámicamente
 window.updateQuantity = (id, change) => {
-    const item = cart.find(item => item.id === id);
+    const item = cart.find(item => String(item.id) === String(id));
     if (item) {
         item.quantity += change;
         if (item.quantity <= 0) {
@@ -128,7 +215,7 @@ window.updateQuantity = (id, change) => {
 };
 
 window.removeFromCart = (id) => {
-    cart = cart.filter(item => item.id !== id);
+    cart = cart.filter(item => String(item.id) !== String(id));
     updateCartUI();
 };
 

@@ -1,7 +1,7 @@
 // ─── Configuración del servidor backend ───────────────────────
 // Cuando corras localmente, apunta a localhost:3001.
 // En producción cambia esta URL a la de tu servidor desplegado.
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://127.0.0.1:3001';
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();

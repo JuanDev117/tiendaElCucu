@@ -286,6 +286,16 @@ main {
     gap: 2rem;
 }
 
+.empty-products {
+    grid-column: 1 / -1;
+    padding: 2rem;
+    color: var(--text-secondary);
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+}
+
 .product-card {
     background: var(--card-bg);
     border: 1px solid var(--border-color);

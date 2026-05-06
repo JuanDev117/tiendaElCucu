@@ -110,6 +110,142 @@ app.post('/api/logout', async (req, res) => {
     return res.status(200).json({ message: 'Sesión cerrada exitosamente.' });
 });
 
+// ── GET /api/productos ──────────────────────────────────────
+app.get('/api/productos', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('estado', 'activo')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json(data || []);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ── GET /api/productos/admin/all ────────────────────────────
+app.get('/api/productos/admin/all', async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json(data || []);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ── POST /api/productos ──────────────────────────────────────
+app.post('/api/productos', async (req, res) => {
+    const { nombre, precio, stock, categoria, estado, imagen } = req.body;
+
+    if (!nombre || precio === undefined || stock === undefined || !categoria) {
+        return res.status(400).json({ 
+            error: 'Los campos nombre, precio, stock y categoría son obligatorios.' 
+        });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('productos')
+            .insert([{
+                nombre,
+                precio: parseFloat(precio),
+                stock: parseInt(stock),
+                categoria,
+                estado: estado || 'activo',
+                imagen: imagen || '',
+                created_at: new Date().toISOString()
+            }])
+            .select();
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(201).json({
+            message: 'Producto creado exitosamente',
+            producto: data[0]
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ── PUT /api/productos/:id ──────────────────────────────────
+app.put('/api/productos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nombre, precio, stock, categoria, estado, imagen } = req.body;
+
+    if (!nombre || precio === undefined || stock === undefined || !categoria) {
+        return res.status(400).json({ 
+            error: 'Los campos nombre, precio, stock y categoría son obligatorios.' 
+        });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('productos')
+            .update({
+                nombre,
+                precio: parseFloat(precio),
+                stock: parseInt(stock),
+                categoria,
+                estado: estado || 'activo',
+                imagen: imagen || ''
+            })
+            .eq('id', id)
+            .select();
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+
+        return res.status(200).json({
+            message: 'Producto actualizado exitosamente',
+            producto: data[0]
+        });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+// ── DELETE /api/productos/:id ───────────────────────────────
+app.delete('/api/productos/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const { error } = await supabase
+            .from('productos')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json({ message: 'Producto eliminado exitosamente' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
 // ── GET /api/health ──────────────────────────────────────────
 app.get('/api/health', (_, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });

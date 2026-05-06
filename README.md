@@ -1,42 +1,284 @@
-# Tienda El Cucu - E-commerce Premium
+# Tienda El Cucu - E-commerce
 
-Este proyecto es una aplicación web e-commerce ("Tienda de Barrio Premium") construida con **HTML, CSS y Vanilla JS**.
+Sistema e-commerce con frontend en HTML/CSS/JavaScript, backend Node.js + Express y base de datos Supabase. Incluye tienda publica, carrito, login/registro y panel administrador para gestionar productos.
 
-## 🎨 Arquitectura y Estética
+---
 
-- **Diseño**: Inspirado en el estilo Vercel, muy moderno y premium.
-- **Colores**: Fondo negro puro (`#000000`), acentos en tonos verde neón/esmeralda y texto de alto contraste.
-- **Efectos Visuales**: 
-  - Glassmorphism (desenfoques tipo cristal).
-  - Resplandores (glows) detrás de contenedores.
-  - Bordes sutiles y microanimaciones suaves en hover.
-- **Elementos Gráficos**: Recuadros verdes interactivos para los placeholders de las fotos de los productos.
+## Stack
 
-## 📂 Estructura de Archivos y Rutas
+- Frontend: HTML5, CSS3 y JavaScript vanilla
+- Backend: Node.js + Express
+- Base de datos: Supabase PostgreSQL
+- Autenticacion: Supabase Auth mediante el backend
+- Hosting: Vercel para frontend, local/Railway/Render/Heroku para backend
 
-El proyecto está dividido en tres vistas principales y un archivo de configuración raíz:
+---
 
-### Configuración Global
-- `supabase-config.js`: Archivo central donde se inicializa la conexión con Supabase. Contiene las variables para la `URL`, la `anon_key` y el `ADMIN_EMAIL`.
+## Estructura
 
-### Vistas
-- **`/tienda/` (Pública)**
-  - `index.html`: La vista pública del cliente. Contiene la sección Hero, el grid de productos y las categorías.
-  - `style.css`: Archivo base de variables de color, tipografía (Inter) y estilos compartidos para toda la aplicación.
-  - `script.js`: Lógica pública, incluyendo el control del botón del carrito y el efecto transparente del menú de navegación (navbar) al hacer scroll.
+```txt
+e-comerceCucu/
+|-- admin/
+|   |-- admin.html
+|   |-- admin.css
+|   `-- admin.js
+|-- login/
+|   |-- login.html
+|   |-- login.js
+|   |-- login.css
+|   |-- registro.html
+|   `-- registro.js
+|-- server/
+|   |-- server.js
+|   |-- package.json
+|   `-- package-lock.json
+|-- tienda/
+|   |-- index.html
+|   |-- script.js
+|   |-- style.css
+|   |-- favicon.svg
+|   `-- images/
+|-- .env.server
+|-- supabase-config.js
+|-- vercel.json
+`-- README.md
+```
 
-- **`/login/` (Autenticación)**
-  - `login.html`: Vista de inicio de sesión con formulario para email y contraseña.
-  - `login.css`: Estilos específicos para centrar la tarjeta de login, aplicar glassmorphism y estilizar los inputs.
-  - `login.js`: Lógica que consume *Supabase Auth*. Si el login es exitoso, verifica el correo: si coincide con `ADMIN_EMAIL` redirige a `/admin/admin.html`, de lo contrario redirige a `/tienda/index.html`.
+---
 
-- **`/admin/` (Privada / Dashboard)**
-  - `admin.html`: Panel de control exclusivo. Tiene un menú lateral (Sidebar) y una tabla de inventario.
-  - `admin.css`: Estilos específicos del layout administrativo (sidebar fijo, tarjetas de métricas, tabla de datos).
-  - `admin.js`: Incluye un **Guardián de Ruta (Auth Guard)**. Al cargar la página, verifica la sesión mediante `supabaseClient.auth.getSession()`. Si no hay sesión o no es el administrador, expulsa al usuario hacia la vista de login.
+## Configuracion
 
-## 🔐 Flujo de Usuarios (Supabase Auth)
+### 1. Instalar dependencias del backend
 
-1. **Clientes Normales**: Para que un usuario pueda realizar compras en la tienda, deberá iniciar sesión (esta lógica bloquea las funciones de carrito para usuarios anónimos).
-2. **Administrador**: Ingresa por la misma vista de login y es redirigido automáticamente a su panel gracias a la validación de rol basada en su email.
-3. **Protección**: El panel de administrador está protegido vía Javascript para evitar el acceso directo por URL sin una sesión válida de administrador en Supabase.
+```bash
+cd server
+npm install
+```
+
+### 2. Variables de entorno
+
+Crea `.env.server` en la raiz del proyecto:
+
+```env
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_ANON_KEY=tu_anon_key
+SUPABASE_SERVICE_KEY=tu_service_role_key
+ADMIN_EMAIL=tu-email-admin@gmail.com
+PORT=3001
+```
+
+Importante: `.env.server` contiene la service role key. No se debe subir a GitHub.
+
+### 3. Tabla `productos` en Supabase
+
+En Supabase SQL Editor:
+
+```sql
+CREATE TABLE productos (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  nombre TEXT NOT NULL,
+  precio NUMERIC NOT NULL,
+  stock INT NOT NULL,
+  categoria TEXT NOT NULL,
+  estado TEXT DEFAULT 'activo',
+  imagen TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+Columnas usadas por la app:
+
+- `nombre`: nombre visible del producto
+- `precio`: precio en COP
+- `stock`: unidades disponibles
+- `categoria`: categoria mostrada en tienda/admin
+- `estado`: `activo` o `inactivo`
+- `imagen`: URL opcional de imagen
+- `created_at`: fecha usada para ordenar inventario reciente
+
+---
+
+## Como correr localmente
+
+### Backend
+
+```bash
+cd server
+npm start
+```
+
+El backend queda en:
+
+```txt
+http://127.0.0.1:3001
+```
+
+### Frontend
+
+Abre el proyecto con Live Server de VS Code o sirve los archivos estaticos. Rutas principales:
+
+- Tienda: `tienda/index.html`
+- Admin: `admin/admin.html`
+- Login: `login/login.html`
+- Registro: `login/registro.html`
+
+---
+
+## Flujo de productos
+
+El panel administrador guarda productos en Supabase y refresca la tabla de Inventario Reciente.
+
+1. Entra al admin.
+2. Haz clic en `Anadir Producto`.
+3. Completa nombre, precio, stock, categoria, estado e imagen opcional.
+4. Al guardar, el producto se inserta en la tabla `productos`.
+5. Inventario Reciente se actualiza con los datos reales.
+6. La tienda `index.html` muestra productos con `estado = activo` y `stock > 0`.
+
+Desde Inventario Reciente tambien se puede:
+
+- Editar producto
+- Cambiar precio, stock, categoria, estado o imagen
+- Eliminar producto
+- Refrescar la tabla
+
+---
+
+## Conexion a la API y Supabase
+
+Los archivos del frontend usan esta regla:
+
+- En local (`localhost` o `127.0.0.1`) llaman al backend en `http://127.0.0.1:3001`.
+- En produccion intentan usar rutas relativas `/api/...`.
+- Si el backend no responde, `admin.js` y `tienda/script.js` usan `supabase-config.js` como respaldo desde el navegador.
+
+`supabase-config.js` solo contiene la anon key publica. La service role key debe quedarse siempre en `.env.server`.
+
+---
+
+## Endpoints
+
+### Publicos
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| POST | `/api/login` | Iniciar sesion |
+| POST | `/api/registro` | Registrar usuario |
+| POST | `/api/logout` | Cerrar sesion |
+| GET | `/api/productos` | Obtener productos activos |
+| GET | `/api/health` | Verificar servidor |
+
+### Productos admin
+
+| Metodo | Endpoint | Descripcion |
+|--------|----------|-------------|
+| GET | `/api/productos/admin/all` | Obtener todos los productos |
+| POST | `/api/productos` | Crear producto |
+| PUT | `/api/productos/:id` | Actualizar producto |
+| DELETE | `/api/productos/:id` | Eliminar producto |
+
+---
+
+## Ejemplos
+
+### Crear producto
+
+```js
+const response = await fetch('http://127.0.0.1:3001/api/productos', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    nombre: 'Bebida Energetica',
+    precio: 2500,
+    stock: 50,
+    categoria: 'Bebidas',
+    estado: 'activo',
+    imagen: 'https://ejemplo.com/imagen.jpg'
+  })
+});
+
+const data = await response.json();
+```
+
+### Obtener productos activos
+
+```js
+const response = await fetch('http://127.0.0.1:3001/api/productos');
+const productos = await response.json();
+```
+
+---
+
+## Funcionalidades
+
+### Tienda
+
+- Carga productos desde Supabase/backend
+- Muestra solo productos activos con stock
+- Carrito de compras
+- Validacion de sesion antes de comprar
+- Navbar con usuario logueado
+
+### Admin
+
+- Inventario reciente con datos reales de la DB
+- Crear productos
+- Editar productos
+- Eliminar productos
+- Estadistica de inventario basada en stock real
+- Estados visuales: activo, inactivo, bajo stock y agotado
+
+### Backend
+
+- CRUD de productos
+- Login y registro
+- Integracion con Supabase
+- CORS para desarrollo local y produccion
+
+---
+
+## Solucion de problemas
+
+### No aparecen productos en la tienda
+
+- Verifica que el producto tenga `estado = activo`.
+- Verifica que `stock` sea mayor que `0`.
+- Revisa que el backend este corriendo en `http://127.0.0.1:3001`.
+- Revisa la consola del navegador.
+
+### No guarda productos
+
+- Verifica que exista la tabla `productos`.
+- Revisa las variables de `.env.server`.
+- Confirma que `SUPABASE_SERVICE_KEY` sea la service role key.
+- Si usas Supabase directo desde navegador, revisa las politicas RLS.
+
+### Error CORS
+
+- Agrega el origen del frontend en la lista `origin` de `server/server.js`.
+- Reinicia el backend despues de cambiar CORS.
+
+### Produccion en Vercel
+
+Este repositorio tiene `vercel.json` para rutas estaticas. Si el backend no esta desplegado bajo el mismo dominio, debes configurar la URL real de la API en los JS o desplegar el backend aparte.
+
+---
+
+## Rutas utiles
+
+- `/` -> `tienda/index.html`
+- `/tienda` -> `tienda/index.html`
+- `/login` -> `login/login.html`
+- `/registro` -> `login/registro.html`
+- `/admin` -> `admin/admin.html`
+
+---
+
+## Estado actual
+
+- Productos conectados a Supabase
+- Inventario reciente editable desde admin
+- Productos activos visibles en tienda
+- Backend local verificado en puerto `3001`
+
+Ultima actualizacion: 6 de mayo de 2026
