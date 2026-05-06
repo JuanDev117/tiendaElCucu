@@ -1,6 +1,6 @@
 # Tienda El Cucu - E-commerce
 
-Sistema e-commerce con frontend en HTML/CSS/JavaScript, backend Node.js + Express y base de datos Supabase. Incluye tienda publica, carrito, login/registro y panel administrador para gestionar productos.
+Sistema e-commerce con frontend en HTML/CSS/JavaScript, backend Node.js + Express y base de datos Supabase. Incluye tienda publica, carrito, login/registro y panel administrador con vistas de dashboard, productos, pedidos y clientes.
 
 ---
 
@@ -126,13 +126,13 @@ Abre el proyecto con Live Server de VS Code o sirve los archivos estaticos. Ruta
 
 ## Flujo de productos
 
-El panel administrador guarda productos en Supabase y refresca la tabla de Inventario Reciente.
+El panel administrador guarda productos en Supabase y refresca la tabla de inventario reciente en la vista `Productos`.
 
 1. Entra al admin.
 2. Haz clic en `Anadir Producto`.
 3. Completa nombre, precio, stock, categoria, estado e imagen opcional.
 4. Al guardar, el producto se inserta en la tabla `productos`.
-5. Inventario Reciente se actualiza con los datos reales.
+5. La vista `Productos` se actualiza con los datos reales.
 6. La tienda `index.html` muestra productos con `estado = activo` y `stock > 0`.
 
 Desde Inventario Reciente tambien se puede:
@@ -141,6 +141,25 @@ Desde Inventario Reciente tambien se puede:
 - Cambiar precio, stock, categoria, estado o imagen
 - Eliminar producto
 - Refrescar la tabla
+
+---
+
+## Panel administrador
+
+La vista admin vive en `admin/admin.html` y funciona como una sola pantalla con navegacion lateral.
+
+Vistas disponibles:
+
+- `Dashboard`: resumen del negocio, acciones rapidas y estado operativo.
+- `Productos`: inventario real conectado a la tabla `productos`.
+- `Pedidos`: vista preparada para gestionar pedidos cuando se agregue esa tabla/flujo.
+- `Clientes`: vista preparada para listar clientes cuando se agregue esa tabla/flujo.
+
+Desde el sidebar, el boton `Ir a la tienda` manda directamente a:
+
+```txt
+/tienda/index.html
+```
 
 ---
 
@@ -221,12 +240,18 @@ const productos = await response.json();
 
 ### Admin
 
+- Dashboard con acciones rapidas
+- Navegacion entre vistas sin recargar la pagina
+- Vista Productos conectada a Supabase
+- Vista Pedidos preparada
+- Vista Clientes preparada
 - Inventario reciente con datos reales de la DB
 - Crear productos
 - Editar productos
 - Eliminar productos
 - Estadistica de inventario basada en stock real
 - Estados visuales: activo, inactivo, bajo stock y agotado
+- Boton `Ir a la tienda` conectado a `tienda/index.html`
 
 ### Backend
 
@@ -278,6 +303,8 @@ Este repositorio tiene `vercel.json` para rutas estaticas. Si el backend no esta
 
 - Productos conectados a Supabase
 - Inventario reciente editable desde admin
+- Vistas admin de Dashboard, Productos, Pedidos y Clientes
+- Boton admin `Ir a la tienda` apunta a `tienda/index.html`
 - Productos activos visibles en tienda
 - Backend local verificado en puerto `3001`
 
