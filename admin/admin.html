@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../tienda/style.css"> <!-- Importamos variables y base -->
-    <link rel="stylesheet" href="admin.css"> <!-- Estilos del panel de control -->
+    <link rel="stylesheet" href="/tienda/style.css"> <!-- Importamos variables y base -->
+    <link rel="stylesheet" href="/admin/admin.css"> <!-- Estilos del panel de control -->
 </head>
 <body class="admin-body">
     <div class="admin-layout">
@@ -40,7 +40,7 @@
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <a href="../tienda/index.html" class="nav-item text-secondary">
+                <a href="/" class="nav-item text-secondary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     Ir a la Tienda
                 </a>
@@ -201,6 +201,7 @@
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="admin.js"></script>
+<script src="/supabase-config.js"></script>
+<script src="/admin/admin.js"></script>
 </body>
 </html>

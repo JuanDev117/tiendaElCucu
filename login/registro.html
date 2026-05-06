@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../tienda/style.css">
-    <link rel="stylesheet" href="login.css"> <!-- Reusamos los mismos estilos premium -->
+    <link rel="stylesheet" href="/tienda/style.css">
+    <link rel="stylesheet" href="/login/login.css"> <!-- Reusamos los mismos estilos premium -->
 </head>
 <body>
     <div class="login-container">
@@ -17,7 +17,7 @@
         
         <div class="login-card">
             <div class="login-header">
-                <a href="../tienda/index.html" class="logo-link">
+                <a href="/" class="logo-link">
                     <span class="logo-text">Tienda el cucu<span class="dot">.</span></span>
                 </a>
                 <h1>Crea tu cuenta</h1>
@@ -44,13 +44,13 @@
             <div id="success" style="color: var(--green-primary); font-size: 0.875rem; text-align: center; margin-top: 0.5rem;"></div>
             
             <div class="login-footer">
-                <p>¿Ya tienes una cuenta? <a href="login.html">Inicia Sesión</a></p>
+                <p>¿Ya tienes una cuenta? <a href="/login">Inicia Sesión</a></p>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../supabase-config.js"></script>
-    <script src="registro.js"></script>
+    <script src="/supabase-config.js"></script>
+    <script src="/login/registro.js"></script>
 </body>
 </html>
