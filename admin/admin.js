@@ -9,11 +9,17 @@ let productos = [];
 let productoEnEdicion = null;
 
 // Elementos del DOM
-const addBtn = document.querySelector('.add-btn');
+const addBtns = document.querySelectorAll('.add-btn');
 const adminTable = document.querySelector('.admin-table tbody');
 const refreshBtn = document.querySelector('.btn-icon[aria-label="Actualizar"]');
 const statValues = document.querySelectorAll('.stat-value');
 const statTrends = document.querySelectorAll('.stat-trend');
+const navItems = document.querySelectorAll('.sidebar-nav .nav-item[data-view]');
+const viewPanels = document.querySelectorAll('.admin-view[data-view-panel]');
+const quickActions = document.querySelectorAll('[data-go-view]');
+const productosTotal = document.getElementById('productos-total');
+const productosActivos = document.getElementById('productos-activos');
+const productosBajos = document.getElementById('productos-bajos');
 
 // ─── Cargar productos al iniciar ───────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -23,12 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ─── Event Listeners ───────────────────────────────────────
 function setupEventListeners() {
-    if (addBtn) {
-        addBtn.addEventListener('click', abrirModalAgregar);
-    }
+    addBtns.forEach(btn => btn.addEventListener('click', abrirModalAgregar));
+
     if (refreshBtn) {
         refreshBtn.addEventListener('click', cargarProductos);
     }
+
+    navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            cambiarVista(item.dataset.view);
+        });
+    });
+
+    quickActions.forEach(action => {
+        action.addEventListener('click', () => cambiarVista(action.dataset.goView));
+    });
+}
+
+function cambiarVista(viewName) {
+    navItems.forEach(item => item.classList.toggle('active', item.dataset.view === viewName));
+    viewPanels.forEach(panel => panel.classList.toggle('active', panel.dataset.viewPanel === viewName));
 }
 
 // ─── Cargar productos del backend ───────────────────────────
@@ -64,6 +85,7 @@ async function obtenerProductosAdmin() {
 function actualizarResumenInventario() {
     const totalStock = productos.reduce((total, producto) => total + Number(producto.stock || 0), 0);
     const bajosStock = productos.filter(producto => Number(producto.stock || 0) > 0 && Number(producto.stock || 0) <= 5).length;
+    const activos = productos.filter(producto => producto.estado === 'activo').length;
 
     if (statValues[2]) {
         statValues[2].textContent = totalStock.toLocaleString('es-CO');
@@ -71,6 +93,18 @@ function actualizarResumenInventario() {
 
     if (statTrends[2]) {
         statTrends[2].textContent = bajosStock === 1 ? '1 bajo de stock' : `${bajosStock} bajos de stock`;
+    }
+
+    if (productosTotal) {
+        productosTotal.textContent = productos.length.toLocaleString('es-CO');
+    }
+
+    if (productosActivos) {
+        productosActivos.textContent = activos.toLocaleString('es-CO');
+    }
+
+    if (productosBajos) {
+        productosBajos.textContent = bajosStock.toLocaleString('es-CO');
     }
 }
 
@@ -325,8 +359,8 @@ function crearModal() {
                 </div>
 
                 <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">URL de Imagen <span style="color: var(--text-secondary); font-size: 0.85rem;">(Opcional)</span></label>
-                    <input type="url" name="imagen" style="
+                    <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Imagen <span style="color: var(--text-secondary); font-size: 0.85rem;">(URL o ruta local)</span></label>
+                    <input type="text" name="imagen" style="
                         width: 100%;
                         padding: 12px 16px;
                         border: 1px solid var(--border-color);
@@ -336,7 +370,7 @@ function crearModal() {
                         font-size: 15px;
                         box-sizing: border-box;
                         transition: all 0.2s;
-                    " placeholder="https://ejemplo.com/imagen.jpg (opcional)" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
+                    " placeholder="/tienda/images/mi-imagen.jpg o https://ejemplo.com/imagen.jpg" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
                 </div>
 
                 <div style="display: flex; gap: 12px; margin-top: 28px;">

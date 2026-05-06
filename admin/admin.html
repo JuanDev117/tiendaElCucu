@@ -8,53 +8,48 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/tienda/style.css"> <!-- Importamos variables y base -->
-    <link rel="stylesheet" href="/admin/admin.css"> <!-- Estilos del panel de control -->
+    <link rel="stylesheet" href="/tienda/style.css">
+    <link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body class="admin-body">
     <div class="admin-layout">
-        <!-- Sidebar lateral -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <span class="logo-text">Tienda el cucu<span class="dot">.</span> <span class="admin-badge">Admin</span></span>
             </div>
+
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">
+                <a href="#" class="nav-item active" data-view="dashboard">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     Dashboard
                 </a>
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-view="productos">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.28V7.72a2 2 0 0 0-1-1.73l-6-3.46a2 2 0 0 0-2 0l-6 3.46a2 2 0 0 0-1 1.73v8.56a2 2 0 0 0 1 1.73l6 3.46a2 2 0 0 0 2 0l6-3.46a2 2 0 0 0 1-1.73z"></path><polyline points="12 22 12 12"></polyline><polyline points="12 12 21 7"></polyline><polyline points="3 7 12 12"></polyline></svg>
                     Productos
                 </a>
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-view="pedidos">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     Pedidos
                 </a>
-                <a href="#" class="nav-item">
+                <a href="#" class="nav-item" data-view="clientes">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                     Clientes
                 </a>
-                <a href="#" class="nav-item">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    Ajustes
-                </a>
             </nav>
+
             <div class="sidebar-footer">
                 <a href="/" class="nav-item text-secondary">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    Ir a la Tienda
+                    Ir a la tienda
                 </a>
             </div>
         </aside>
 
-        <!-- Contenido Principal -->
         <main class="admin-main">
-            <!-- Topbar (Glassmorphism) -->
             <header class="admin-header">
                 <div class="search-bar">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" placeholder="Buscar productos, pedidos...">
+                    <input type="text" placeholder="Buscar productos, pedidos, clientes...">
                 </div>
                 <div class="admin-profile">
                     <div class="profile-avatar">C</div>
@@ -63,146 +58,175 @@
             </header>
 
             <div class="admin-content">
-                <div class="admin-header-flex">
-                    <h1 class="page-title">Resumen del Negocio</h1>
-                    <button class="btn btn-primary add-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        Añadir Producto
-                    </button>
-                </div>
+                <section class="admin-view active" data-view-panel="dashboard">
+                    <div class="admin-header-flex">
+                        <div>
+                            <p class="page-kicker">Panel principal</p>
+                            <h1 class="page-title">Resumen del negocio</h1>
+                        </div>
+                        <button class="btn btn-primary add-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Añadir producto
+                        </button>
+                    </div>
 
-                <!-- Tarjetas de Estadísticas -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
+                            <div class="stat-details">
+                                <h3>Ingresos del dia</h3>
+                                <p class="stat-value">$0</p>
+                                <span class="stat-trend positive">Pendiente de pedidos</span>
+                            </div>
                         </div>
-                        <div class="stat-details">
-                            <h3>Ingresos del Día</h3>
-                            <p class="stat-value">$245.50</p>
-                            <span class="stat-trend positive">+12.5% vs ayer</span>
+                        <div class="stat-card">
+                            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
+                            <div class="stat-details">
+                                <h3>Pedidos hoy</h3>
+                                <p class="stat-value">0</p>
+                                <span class="stat-trend positive">Sin pedidos nuevos</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                        </div>
-                        <div class="stat-details">
-                            <h3>Pedidos Hoy</h3>
-                            <p class="stat-value">48</p>
-                            <span class="stat-trend positive">+5.2% vs ayer</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.28V7.72a2 2 0 0 0-1-1.73l-6-3.46a2 2 0 0 0-2 0l-6 3.46a2 2 0 0 0-1 1.73v8.56a2 2 0 0 0 1 1.73l6 3.46a2 2 0 0 0 2 0l6-3.46a2 2 0 0 0 1-1.73z"></path><polyline points="12 22 12 12"></polyline><polyline points="12 12 21 7"></polyline><polyline points="3 7 12 12"></polyline></svg>
-                        </div>
-                        <div class="stat-details">
-                            <h3>Inventario</h3>
-                            <p class="stat-value">1,204</p>
-                            <span class="stat-trend warning">3 bajos de stock</span>
+                        <div class="stat-card">
+                            <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.28V7.72a2 2 0 0 0-1-1.73l-6-3.46a2 2 0 0 0-2 0l-6 3.46a2 2 0 0 0-1 1.73v8.56a2 2 0 0 0 1 1.73l6 3.46a2 2 0 0 0 2 0l6-3.46a2 2 0 0 0 1-1.73z"></path><polyline points="12 22 12 12"></polyline><polyline points="12 12 21 7"></polyline><polyline points="3 7 12 12"></polyline></svg></div>
+                            <div class="stat-details">
+                                <h3>Inventario</h3>
+                                <p class="stat-value">0</p>
+                                <span class="stat-trend warning">0 bajos de stock</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Tabla de Productos -->
-                <div class="admin-table-container">
-                    <div class="table-header">
-                        <h2>Inventario Reciente</h2>
-                        <button class="btn-icon" aria-label="Actualizar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                    <div class="dashboard-grid">
+                        <div class="admin-panel">
+                            <div class="panel-heading"><h2>Acciones rapidas</h2></div>
+                            <div class="quick-actions">
+                                <button class="quick-action" data-go-view="productos">Gestionar productos</button>
+                                <button class="quick-action" data-go-view="pedidos">Revisar pedidos</button>
+                                <button class="quick-action" data-go-view="clientes">Ver clientes</button>
+                            </div>
+                        </div>
+                        <div class="admin-panel">
+                            <div class="panel-heading"><h2>Estado operativo</h2></div>
+                            <div class="status-list">
+                                <div><span class="status-dot active"></span>Productos conectados a Supabase</div>
+                                <div><span class="status-dot"></span>Pedidos listos para integrar</div>
+                                <div><span class="status-dot"></span>Clientes listos para integrar</div>
+                            </div>
+                        </div>
                     </div>
-                    <table class="admin-table">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Categoría</th>
-                                <th>Precio</th>
-                                <th>Stock</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="td-product">
-                                        <div class="mini-placeholder"></div>
-                                        <span>Bebida Energética Monster</span>
-                                    </div>
-                                </td>
-                                <td>Bebidas</td>
-                                <td>$2.50</td>
-                                <td>45</td>
-                                <td><span class="badge badge-active">Activo</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn edit" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                        <button class="action-btn delete" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="td-product">
-                                        <div class="mini-placeholder"></div>
-                                        <span>Papas Fritas Lays</span>
-                                    </div>
-                                </td>
-                                <td>Snacks</td>
-                                <td>$1.80</td>
-                                <td>5</td>
-                                <td><span class="badge badge-warning">Bajo</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn edit" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                        <button class="action-btn delete" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="td-product">
-                                        <div class="mini-placeholder"></div>
-                                        <span>Leche Entera Colanta 1L</span>
-                                    </div>
-                                </td>
-                                <td>Lácteos</td>
-                                <td>$1.20</td>
-                                <td>0</td>
-                                <td><span class="badge badge-danger">Agotado</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn edit" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                        <button class="action-btn delete" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="td-product">
-                                        <div class="mini-placeholder"></div>
-                                        <span>Pan Tajado Bimbo</span>
-                                    </div>
-                                </td>
-                                <td>Panadería</td>
-                                <td>$3.00</td>
-                                <td>24</td>
-                                <td><span class="badge badge-active">Activo</span></td>
-                                <td>
-                                    <div class="actions">
-                                        <button class="action-btn edit" title="Editar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
-                                        <button class="action-btn delete" title="Eliminar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                </section>
+
+                <section class="admin-view" data-view-panel="productos">
+                    <div class="admin-header-flex">
+                        <div>
+                            <p class="page-kicker">Inventario</p>
+                            <h1 class="page-title">Productos</h1>
+                        </div>
+                        <button class="btn btn-primary add-btn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Añadir producto
+                        </button>
+                    </div>
+
+                    <div class="product-toolbar">
+                        <div class="toolbar-card"><span>Total productos</span><strong id="productos-total">0</strong></div>
+                        <div class="toolbar-card"><span>Activos</span><strong id="productos-activos">0</strong></div>
+                        <div class="toolbar-card"><span>Bajo stock</span><strong id="productos-bajos">0</strong></div>
+                    </div>
+
+                    <div class="admin-table-container">
+                        <div class="table-header">
+                            <h2>Inventario reciente</h2>
+                            <button class="btn-icon" aria-label="Actualizar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg></button>
+                        </div>
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoria</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="admin-view" data-view-panel="pedidos">
+                    <div class="admin-header-flex">
+                        <div>
+                            <p class="page-kicker">Ventas</p>
+                            <h1 class="page-title">Pedidos</h1>
+                        </div>
+                        <button class="btn btn-secondary">Exportar</button>
+                    </div>
+                    <div class="product-toolbar">
+                        <div class="toolbar-card"><span>Pendientes</span><strong>0</strong></div>
+                        <div class="toolbar-card"><span>En camino</span><strong>0</strong></div>
+                        <div class="toolbar-card"><span>Completados</span><strong>0</strong></div>
+                    </div>
+                    <div class="admin-table-container">
+                        <div class="table-header"><h2>Pedidos recientes</h2></div>
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Total</th>
+                                    <th>Entrega</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6"><div class="empty-state">Aun no hay pedidos registrados.</div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="admin-view" data-view-panel="clientes">
+                    <div class="admin-header-flex">
+                        <div>
+                            <p class="page-kicker">Comunidad</p>
+                            <h1 class="page-title">Clientes</h1>
+                        </div>
+                        <button class="btn btn-secondary">Nuevo cliente</button>
+                    </div>
+                    <div class="product-toolbar">
+                        <div class="toolbar-card"><span>Total clientes</span><strong>0</strong></div>
+                        <div class="toolbar-card"><span>Activos</span><strong>0</strong></div>
+                        <div class="toolbar-card"><span>Nuevos este mes</span><strong>0</strong></div>
+                    </div>
+                    <div class="admin-table-container">
+                        <div class="table-header"><h2>Directorio de clientes</h2></div>
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Email</th>
+                                    <th>Telefono</th>
+                                    <th>Pedidos</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="6"><div class="empty-state">Aun no hay clientes para mostrar.</div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/supabase-config.js"></script>
-<script src="/admin/admin.js"></script>
+    <script src="/supabase-config.js"></script>
+    <script src="/admin/admin.js"></script>
 </body>
 </html>

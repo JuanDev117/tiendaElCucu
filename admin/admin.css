@@ -163,6 +163,14 @@
     width: 100%;
 }
 
+.admin-view {
+    display: none;
+}
+
+.admin-view.active {
+    display: block;
+}
+
 .admin-header-flex {
     display: flex;
     justify-content: space-between;
@@ -172,6 +180,15 @@
 
 .page-title {
     font-size: 1.75rem;
+}
+
+.page-kicker {
+    color: var(--green-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
 }
 
 .add-btn {
@@ -259,6 +276,101 @@
 .stat-trend.warning {
     background: rgba(234, 179, 8, 0.1);
     color: #eab308;
+}
+
+.dashboard-grid,
+.product-toolbar {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.product-toolbar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-panel,
+.toolbar-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.panel-heading {
+    margin-bottom: 1rem;
+}
+
+.panel-heading h2 {
+    font-size: 1rem;
+}
+
+.quick-actions {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.quick-action {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    padding: 0.9rem 1rem;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.quick-action:hover {
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.status-list {
+    display: grid;
+    gap: 0.8rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 0.65rem;
+    border-radius: 999px;
+    background: #64748b;
+}
+
+.status-dot.active {
+    background: var(--green-primary);
+    box-shadow: 0 0 12px var(--green-glow-strong);
+}
+
+.toolbar-card span {
+    color: var(--text-secondary);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+}
+
+.toolbar-card strong {
+    color: var(--text-primary);
+    font-size: 1.5rem;
+}
+
+.empty-state {
+    color: var(--text-secondary);
+    padding: 1.5rem;
+    text-align: center;
 }
 
 /* Table */
