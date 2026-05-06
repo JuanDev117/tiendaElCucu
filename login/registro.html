@@ -40,6 +40,8 @@
                 
                 <button type="submit" class="btn btn-primary login-btn">Registrarse</button>
             </form>
+            <div id="error" style="color: #ef4444; font-size: 0.875rem; text-align: center; margin-top: 1rem;"></div>
+            <div id="success" style="color: var(--green-primary); font-size: 0.875rem; text-align: center; margin-top: 0.5rem;"></div>
             
             <div class="login-footer">
                 <p>¿Ya tienes una cuenta? <a href="login.html">Inicia Sesión</a></p>
@@ -47,9 +49,6 @@
         </div>
     </div>
 
-    <div id="error" style="color: #ef4444; font-size: 0.875rem; text-align: center; margin-top: 1rem;"></div>
-    <div id="success" style="color: var(--green-primary); font-size: 0.875rem; text-align: center; margin-top: 1rem;"></div>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../supabase-config.js"></script>
     <script src="registro.js"></script>

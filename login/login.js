@@ -19,7 +19,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     });
 
     if (error) {
-        errorMsg.textContent = 'Correo o contraseña incorrectos.';
+        errorMsg.textContent = 'Error al entrar: ' + error.message;
         btn.innerHTML = originalText;
         btn.style.opacity = '1';
         btn.disabled = false;
@@ -33,3 +33,23 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         window.location.href = '../tienda/index.html';
     }
 });
+
+// Lógica para el ojito de contraseña
+const togglePasswordBtn = document.querySelector('.toggle-password');
+if (togglePasswordBtn) {
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.querySelector('.eye-icon');
+    const eyeOffIcon = document.querySelector('.eye-off-icon');
+
+    togglePasswordBtn.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.style.display = 'none';
+            eyeOffIcon.style.display = 'block';
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.style.display = 'block';
+            eyeOffIcon.style.display = 'none';
+        }
+    });
+}
