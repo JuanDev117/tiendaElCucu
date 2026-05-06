@@ -1,3 +1,8 @@
+// ─── Configuración del servidor backend ───────────────────────
+// Cuando corras localmente, apunta a localhost:3001.
+// En producción cambia esta URL a la de tu servidor desplegado.
+const API_URL = 'http://localhost:3001';
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -10,27 +15,38 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     btn.innerHTML = 'Conectando...';
     btn.style.opacity = '0.8';
     btn.disabled = true;
-    errorMsg.textContent = ''; // Limpiar errores anteriores
+    errorMsg.textContent = '';
 
-    // Usar el cliente centralizado
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ 
-        email, 
-        password 
-    });
+    try {
+        const response = await fetch(`${API_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
 
-    if (error) {
-        errorMsg.textContent = 'Error al entrar: ' + error.message;
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al iniciar sesión.');
+        }
+
+        // Guardar token y datos de usuario en sessionStorage
+        sessionStorage.setItem('cucu_token', result.access_token);
+        sessionStorage.setItem('cucu_user', JSON.stringify(result.user));
+        sessionStorage.setItem('cucu_is_admin', result.isAdmin);
+
+        // Redirigir según el rol
+        if (result.isAdmin) {
+            window.location.href = '../admin/admin.html';
+        } else {
+            window.location.href = '../tienda/index.html';
+        }
+
+    } catch (err) {
+        errorMsg.textContent = err.message;
         btn.innerHTML = originalText;
         btn.style.opacity = '1';
         btn.disabled = false;
-        return;
-    }
-
-    // Redirigir según el rol
-    if (email === ADMIN_EMAIL) {
-        window.location.href = '../admin/admin.html';
-    } else {
-        window.location.href = '../tienda/index.html';
     }
 });
 

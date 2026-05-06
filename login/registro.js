@@ -1,3 +1,6 @@
+// ─── Configuración del servidor backend ───────────────────────
+const API_URL = 'http://localhost:3001';
+
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -16,33 +19,36 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     errorMsg.textContent = ''; 
     successMsg.textContent = '';
 
-    // Llamada a Supabase para registrar usuario (signUp)
-    const { data, error } = await supabaseClient.auth.signUp({ 
-        email, 
-        password,
-        options: {
-            data: {
-                full_name: name
-            }
-        }
-    });
+    try {
+        const response = await fetch(`${API_URL}/api/registro`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, name })
+        });
 
-    if (error) {
-        errorMsg.textContent = 'Error al registrar: ' + error.message;
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al registrar el usuario.');
+        }
+
+        // Registro exitoso
+        btn.innerHTML = '¡Cuenta Creada!';
+        btn.style.background = 'var(--green-primary)';
+        btn.style.color = '#000';
+        successMsg.textContent = 'Registro exitoso. Redirigiendo a la tienda...';
+        
+        // Guardar usuario en sessionStorage
+        sessionStorage.setItem('cucu_user', JSON.stringify(result.user));
+
+        setTimeout(() => {
+            window.location.href = '../tienda/index.html';
+        }, 2000);
+
+    } catch (err) {
+        errorMsg.textContent = err.message;
         btn.innerHTML = originalText;
         btn.style.opacity = '1';
         btn.disabled = false;
-        return;
     }
-
-    // Registro exitoso
-    btn.innerHTML = '¡Cuenta Creada!';
-    btn.style.background = 'var(--green-primary)';
-    btn.style.color = '#000';
-    successMsg.textContent = 'Registro exitoso. Redirigiendo a la tienda...';
-    
-    // Al registrar, redirigimos directamente a la tienda 
-    setTimeout(() => {
-        window.location.href = '../tienda/index.html';
-    }, 2000);
 });

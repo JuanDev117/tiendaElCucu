@@ -148,6 +148,67 @@
         </div>
     </footer>
 
+    <!-- MODAL DEL CARRITO -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    <div id="cart-modal" class="cart-modal">
+        <div class="cart-header">
+            <h2>Tu Carrito</h2>
+            <button id="close-cart" class="close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <div id="cart-items-container" class="cart-items-container">
+            <!-- Los items se agregan aquí dinámicamente -->
+        </div>
+
+        <div class="cart-empty-state" id="cart-empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            <p>Tu carrito está vacío</p>
+        </div>
+
+        <div id="cart-options" class="cart-options" style="display:none;">
+            <div class="delivery-options">
+                <h3>Método de Entrega</h3>
+                <div class="option-group">
+                    <label class="radio-option">
+                        <input type="radio" name="delivery" value="delivery" checked>
+                        <span class="radio-custom"></span>
+                        <div class="option-content">
+                            <strong>Domicilio</strong>
+                            <small>Envío a tu casa</small>
+                        </div>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="delivery" value="pickup">
+                        <span class="radio-custom"></span>
+                        <div class="option-content">
+                            <strong>Recoger en Tienda</strong>
+                            <small>Pasa a buscar tu pedido</small>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotal">$0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Envío</span>
+                    <span id="shipping-cost">$0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span id="total-price">$0</span>
+                </div>
+            </div>
+
+            <button id="checkout-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Proceder al pago</button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabase-config.js"></script>
     <script src="/tienda/script.js"></script>
