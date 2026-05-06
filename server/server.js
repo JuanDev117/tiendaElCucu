@@ -1,4 +1,5 @@
 require('dotenv').config({ path: '../.env.server' });
+
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
@@ -6,31 +7,41 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ── Supabase con Service Role (nunca expuesto al cliente) ──
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
 );
 
-// ── Middlewares ──
-app.use(express.json());
-app.use(cors({
-    origin: [
-        'http://localhost:3000',   // si sirves el front local
-        'http://127.0.0.1:3000',   // frontend local en 127.0.0.1
-        'http://127.0.0.1:5500',  // Live Server de VS Code
-        'http://localhost:5500',  // Live Server de VS Code (localhost)
-        'https://tiendaelcucu.vercel.app' // dominio en producción (ajusta si es diferente)
-    ],
-    credentials: true
-}));
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'https://tiendaelcucu.vercel.app'
+];
 
-// ── POST /api/login ──────────────────────────────────────────
+const corsOptions = {
+    origin(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(express.json());
+
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email y contraseña son obligatorios.' });
+        return res.status(400).json({ error: 'Email y contrasena son obligatorios.' });
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -39,7 +50,6 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ error: error.message });
     }
 
-    // Determinar rol
     const isAdmin = email === process.env.ADMIN_EMAIL;
 
     return res.status(200).json({
@@ -54,7 +64,6 @@ app.post('/api/login', async (req, res) => {
     });
 });
 
-// ── POST /api/registro ───────────────────────────────────────
 app.post('/api/registro', async (req, res) => {
     const { email, password, name } = req.body;
 
@@ -63,7 +72,7 @@ app.post('/api/registro', async (req, res) => {
     }
 
     if (password.length < 6) {
-        return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+        return res.status(400).json({ error: 'La contrasena debe tener al menos 6 caracteres.' });
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -88,14 +97,13 @@ app.post('/api/registro', async (req, res) => {
     });
 });
 
-// ── POST /api/logout ─────────────────────────────────────────
 app.post('/api/logout', async (req, res) => {
     const authHeader = req.headers.authorization;
+
     if (!authHeader) {
         return res.status(401).json({ error: 'Token no proporcionado.' });
     }
 
-    // Usamos el token del usuario para cerrar su sesión específica en Supabase
     const userClient = createClient(
         process.env.SUPABASE_URL,
         process.env.SUPABASE_ANON_KEY
@@ -107,11 +115,10 @@ app.post('/api/logout', async (req, res) => {
         return res.status(500).json({ error: error.message });
     }
 
-    return res.status(200).json({ message: 'Sesión cerrada exitosamente.' });
+    return res.status(200).json({ message: 'Sesion cerrada exitosamente.' });
 });
 
-// ── GET /api/productos ──────────────────────────────────────
-app.get('/api/productos', async (req, res) => {
+app.get('/api/productos', async (_req, res) => {
     try {
         const { data, error } = await supabase
             .from('productos')
@@ -129,8 +136,7 @@ app.get('/api/productos', async (req, res) => {
     }
 });
 
-// ── GET /api/productos/admin/all ────────────────────────────
-app.get('/api/productos/admin/all', async (req, res) => {
+app.get('/api/productos/admin/all', async (_req, res) => {
     try {
         const { data, error } = await supabase
             .from('productos')
@@ -147,13 +153,12 @@ app.get('/api/productos/admin/all', async (req, res) => {
     }
 });
 
-// ── POST /api/productos ──────────────────────────────────────
 app.post('/api/productos', async (req, res) => {
     const { nombre, precio, stock, categoria, estado, imagen } = req.body;
 
     if (!nombre || precio === undefined || stock === undefined || !categoria) {
-        return res.status(400).json({ 
-            error: 'Los campos nombre, precio, stock y categoría son obligatorios.' 
+        return res.status(400).json({
+            error: 'Los campos nombre, precio, stock y categoria son obligatorios.'
         });
     }
 
@@ -163,7 +168,7 @@ app.post('/api/productos', async (req, res) => {
             .insert([{
                 nombre,
                 precio: parseFloat(precio),
-                stock: parseInt(stock),
+                stock: parseInt(stock, 10),
                 categoria,
                 estado: estado || 'activo',
                 imagen: imagen || '',
@@ -184,14 +189,13 @@ app.post('/api/productos', async (req, res) => {
     }
 });
 
-// ── PUT /api/productos/:id ──────────────────────────────────
 app.put('/api/productos/:id', async (req, res) => {
     const { id } = req.params;
     const { nombre, precio, stock, categoria, estado, imagen } = req.body;
 
     if (!nombre || precio === undefined || stock === undefined || !categoria) {
-        return res.status(400).json({ 
-            error: 'Los campos nombre, precio, stock y categoría son obligatorios.' 
+        return res.status(400).json({
+            error: 'Los campos nombre, precio, stock y categoria son obligatorios.'
         });
     }
 
@@ -201,7 +205,7 @@ app.put('/api/productos/:id', async (req, res) => {
             .update({
                 nombre,
                 precio: parseFloat(precio),
-                stock: parseInt(stock),
+                stock: parseInt(stock, 10),
                 categoria,
                 estado: estado || 'activo',
                 imagen: imagen || ''
@@ -226,7 +230,6 @@ app.put('/api/productos/:id', async (req, res) => {
     }
 });
 
-// ── DELETE /api/productos/:id ───────────────────────────────
 app.delete('/api/productos/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -246,12 +249,10 @@ app.delete('/api/productos/:id', async (req, res) => {
     }
 });
 
-// ── GET /api/health ──────────────────────────────────────────
-app.get('/api/health', (_, res) => {
+app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ── Iniciar servidor ─────────────────────────────────────────
 app.listen(PORT, () => {
-    console.log(`✅  Servidor Cucu corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor Cucu corriendo en http://localhost:${PORT}`);
 });
