@@ -13,7 +13,9 @@ addToCartButtons.forEach(button => {
         
         if (!session) {
             alert("Debes iniciar sesión para poder comprar.");
-            window.location.href = '../login/login.html';
+            // Después
+          window.location.href = '/login';
+          
             return;
         }
 
