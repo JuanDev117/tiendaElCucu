@@ -23,8 +23,12 @@
                 <a href="#contacto">Contacto</a>
             </div>
             <div class="nav-actions">
-                <a href="/login" class="nav-link">Ingresar</a>
-                <a href="/registro" class="nav-btn">Registrarse</a>
+                <a href="/login" class="nav-link" id="btn-ingresar">Ingresar</a>
+                <a href="/registro" class="nav-btn" id="btn-registrarse">Registrarse</a>
+                <div id="user-menu" style="display:none; align-items:center; gap:0.75rem;">
+                    <span id="user-email" style="font-size:0.8rem; color:var(--text-secondary);"></span>
+                    <button id="btn-logout" class="nav-btn" style="background:transparent; border:1px solid #333; color:var(--text-primary); cursor:pointer;">Cerrar sesión</button>
+                </div>
                 <div class="cart-btn">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span class="cart-count">0</span>

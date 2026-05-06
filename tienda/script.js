@@ -53,3 +53,40 @@ window.addEventListener('scroll', () => {
         navbar.style.borderBottom = '1px solid var(--border-color)';
     }
 });
+
+// ---- Gestión de sesión en el navbar ----
+const btnIngresar = document.getElementById('btn-ingresar');
+const btnRegistrarse = document.getElementById('btn-registrarse');
+const userMenu = document.getElementById('user-menu');
+const userEmailSpan = document.getElementById('user-email');
+const btnLogout = document.getElementById('btn-logout');
+
+async function actualizarNavbar() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        // Usuario logueado: ocultar botones y mostrar email + cerrar sesión
+        btnIngresar.style.display = 'none';
+        btnRegistrarse.style.display = 'none';
+        userMenu.style.display = 'flex';
+        userEmailSpan.textContent = session.user.email;
+    } else {
+        // Sin sesión: mostrar botones normales
+        btnIngresar.style.display = '';
+        btnRegistrarse.style.display = '';
+        userMenu.style.display = 'none';
+    }
+}
+
+// Ejecutar al cargar la página
+actualizarNavbar();
+
+// Escuchar cambios de sesión en tiempo real (login/logout)
+supabaseClient.auth.onAuthStateChange(() => {
+    actualizarNavbar();
+});
+
+// Botón de cerrar sesión
+btnLogout.addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    window.location.reload();
+});
