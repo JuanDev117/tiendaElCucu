@@ -175,21 +175,25 @@ function abrirModalEditar(id) {
 
 // ─── Mostrar modal ────────────────────────────────────────
 function mostrarModal(tipo, producto = null) {
-    let modal = document.getElementById('producto-modal');
-    
-    if (!modal) {
-        modal = crearModal();
-        document.body.appendChild(modal);
-    }
-
+    // Obtiene el modal existente del DOM (ahora definido en admin.html)
+    const modal = document.getElementById('producto-modal');
     const form = modal.querySelector('#producto-form');
     const titulo = modal.querySelector('.modal-title');
 
+    if (!modal || !form) {
+        console.error('No se encontró el modal o el formulario en el DOM');
+        return;
+    }
+
+    // Limpiar el formulario antes de usarlo
+    form.reset();
+    productoEnEdicion = null;
+
     if (tipo === 'agregar') {
         titulo.textContent = 'Agregar Nuevo Producto';
-        form.reset();
     } else {
         titulo.textContent = 'Editar Producto';
+        productoEnEdicion = producto;
         form.nombre.value = producto.nombre;
         form.precio.value = producto.precio;
         form.stock.value = producto.stock;
@@ -198,227 +202,43 @@ function mostrarModal(tipo, producto = null) {
         form.imagen.value = producto.imagen || '';
     }
 
+    // Usamos una función anónima para evitar problemas de contexto con 'tipo'
     form.onsubmit = (e) => guardarProducto(e, tipo);
-    modal.style.display = 'flex';
-    
-    // Cerrar modal al hacer click fuera
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
+
+    modal.classList.add('active');
 }
 
-// ─── Crear estructura del modal ────────────────────────────
-function crearModal() {
-    const modal = document.createElement('div');
-    modal.id = 'producto-modal';
-    modal.style.cssText = `
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        backdrop-filter: blur(4px);
-    `;
-
-    modal.innerHTML = `
-        <div class="modal-content" style="
-            background: linear-gradient(135deg, var(--bg-primary) 0%, rgba(22, 163, 74, 0.05) 100%);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
-                        0 0 60px rgba(34, 197, 94, 0.15);
-            border-radius: 16px;
-            padding: 32px;
-            width: 90%;
-            max-width: 550px;
-            max-height: 85vh;
-            overflow-y: auto;
-            color: var(--text-primary);
-            animation: slideUp 0.3s ease-out;
-        ">
-            <style>
-                @keyframes slideUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-            </style>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 class="modal-title" style="margin: 0; font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, var(--text-primary) 0%, var(--green-primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Agregar Producto</h2>
-                <button type="button" onclick="document.getElementById('producto-modal').style.display = 'none'" style="
-                    background: none;
-                    border: none;
-                    font-size: 28px;
-                    cursor: pointer;
-                    color: var(--text-secondary);
-                    transition: all 0.2s;
-                    padding: 4px 8px;
-                ">×</button>
-            </div>
-            
-            <form id="producto-form" style="display: flex; flex-direction: column; gap: 20px;">
-                <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Nombre del Producto</label>
-                    <input type="text" name="nombre" required style="
-                        width: 100%;
-                        padding: 12px 16px;
-                        border: 1px solid var(--border-color);
-                        border-radius: 8px;
-                        background: rgba(0, 0, 0, 0.2);
-                        color: var(--text-primary);
-                        font-size: 15px;
-                        box-sizing: border-box;
-                        transition: all 0.2s;
-                    " placeholder="Ej: Bebida Energética" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Precio ($)</label>
-                        <input type="number" name="precio" required step="0.01" style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 8px;
-                            background: rgba(0, 0, 0, 0.2);
-                            color: var(--text-primary);
-                            font-size: 15px;
-                            box-sizing: border-box;
-                            transition: all 0.2s;
-                        " placeholder="0.00" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Stock</label>
-                        <input type="number" name="stock" required style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 8px;
-                            background: rgba(0, 0, 0, 0.2);
-                            color: var(--text-primary);
-                            font-size: 15px;
-                            box-sizing: border-box;
-                            transition: all 0.2s;
-                        " placeholder="0" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Categoría</label>
-                        <select name="categoria" required style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 8px;
-                            background: rgba(0, 0, 0, 0.2);
-                            color: var(--text-primary);
-                            font-size: 15px;
-                            box-sizing: border-box;
-                            transition: all 0.2s;
-                            cursor: pointer;
-                        " onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                            <option value="">Selecciona una categoría</option>
-                            <option value="Bebidas">Bebidas</option>
-                            <option value="Snacks">Snacks</option>
-                            <option value="Dulces">Dulces</option>
-                            <option value="Carnes">Carnes</option>
-                            <option value="Lácteos">Lácteos</option>
-                            <option value="Otros">Otros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Estado</label>
-                        <select name="estado" style="
-                            width: 100%;
-                            padding: 12px 16px;
-                            border: 1px solid var(--border-color);
-                            border-radius: 8px;
-                            background: rgba(0, 0, 0, 0.2);
-                            color: var(--text-primary);
-                            font-size: 15px;
-                            box-sizing: border-box;
-                            transition: all 0.2s;
-                            cursor: pointer;
-                        " onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                            <option value="activo">Activo</option>
-                            <option value="inactivo">Inactivo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label style="display: block; margin-bottom: 10px; font-weight: 600; font-size: 0.95rem; color: var(--text-primary);">Imagen <span style="color: var(--text-secondary); font-size: 0.85rem;">(URL o ruta local)</span></label>
-                    <input type="text" name="imagen" style="
-                        width: 100%;
-                        padding: 12px 16px;
-                        border: 1px solid var(--border-color);
-                        border-radius: 8px;
-                        background: rgba(0, 0, 0, 0.2);
-                        color: var(--text-primary);
-                        font-size: 15px;
-                        box-sizing: border-box;
-                        transition: all 0.2s;
-                    " placeholder="/tienda/images/mi-imagen.jpg o https://ejemplo.com/imagen.jpg" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border-color)'">
-                </div>
-
-                <div style="display: flex; gap: 12px; margin-top: 28px;">
-                    <button type="submit" class="btn btn-primary" style="
-                        flex: 1;
-                        padding: 14px 24px;
-                        background: linear-gradient(135deg, var(--green-primary) 0%, var(--green-glow) 100%);
-                        border: none;
-                        border-radius: 8px;
-                        color: #000;
-                        font-weight: 700;
-                        cursor: pointer;
-                        transition: all 0.3s;
-                        font-size: 16px;
-                        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
-                    " onmouseover="this.style.boxShadow='0 15px 35px rgba(34, 197, 94, 0.5)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 10px 25px rgba(34, 197, 94, 0.3)'; this.style.transform='translateY(0)'">
-                        ✓ Guardar Producto
-                    </button>
-                    <button type="button" class="btn" onclick="document.getElementById('producto-modal').style.display = 'none'" style="
-                        flex: 1;
-                        padding: 14px 24px;
-                        background: rgba(0, 0, 0, 0.3);
-                        color: var(--text-primary);
-                        border: 1px solid var(--border-color);
-                        border-radius: 8px;
-                        cursor: pointer;
-                        transition: all 0.3s;
-                        font-weight: 600;
-                        font-size: 16px;
-                    " onmouseover="this.style.borderColor='var(--green-primary)'; this.style.background='rgba(34, 197, 94, 0.1)'" onmouseout="this.style.borderColor='var(--border-color)'; this.style.background='rgba(0, 0, 0, 0.3)'">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    return modal;
+// Función para cerrar el modal de forma segura
+function cerrarModal() {
+    const modal = document.getElementById('producto-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        productoEnEdicion = null;
+    }
 }
+
+// Cerrar modal al hacer click fuera del contenido
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('producto-modal');
+    if (e.target === modal) {
+        cerrarModal();
+    }
+});
 
 // ─── Guardar producto ──────────────────────────────────────
 async function guardarProducto(e, tipo) {
     e.preventDefault();
-
     const form = e.target;
+    console.log(`Intentando ${tipo} producto...`);
+
+    // Limpiamos el precio: eliminamos puntos de miles y convertimos coma decimal en punto
+    const precioLimpio = form.precio.value
+        .replace(/\./g, '')  // Quita los puntos de miles (12.000 -> 12000)
+        .replace(',', '.');  // Cambia coma por punto decimal si el usuario la usó
+
     const datos = {
         nombre: form.nombre.value.trim(),
-        precio: Number(form.precio.value),
+        precio: parseFloat(precioLimpio),
         stock: Number.parseInt(form.stock.value, 10),
         categoria: form.categoria.value,
         estado: form.estado.value,
@@ -427,12 +247,13 @@ async function guardarProducto(e, tipo) {
 
     try {
         const result = await persistirProducto(datos, tipo);
+        console.log('Resultado del servidor:', result);
 
-        alert(result.message);
-        document.getElementById('producto-modal').style.display = 'none';
+        alert(result.message || 'Operación exitosa');
+        cerrarModal();
         cargarProductos();
     } catch (err) {
-        console.error('Error:', err);
+        console.error('Error al guardar:', err);
         alert('Error: ' + err.message);
     }
 }
@@ -442,6 +263,9 @@ async function persistirProducto(datos, tipo) {
         const url = tipo === 'agregar'
             ? `${API_URL}/api/productos`
             : `${API_URL}/api/productos/${productoEnEdicion.id}`;
+        
+        console.log(`Petición ${tipo === 'agregar' ? 'POST' : 'PUT'} a: ${url}`);
+
         const response = await fetch(url, {
             method: tipo === 'agregar' ? 'POST' : 'PUT',
             headers: { 'Content-Type': 'application/json' },

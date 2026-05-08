@@ -225,6 +225,69 @@
         </main>
     </div>
 
+    <!-- Modal para Agregar/Editar Producto -->
+    <div id="producto-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agregar Producto</h2>
+                <button type="button" class="modal-close" onclick="document.getElementById('producto-modal').classList.remove('active')">×</button>
+            </div>
+            
+            <form id="producto-form" class="admin-form">
+                <div class="form-group">
+                    <label class="form-label">Nombre del Producto</label>
+                    <input type="text" name="nombre" class="form-input" required placeholder="Ej: Bebida Energética">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Precio ($)</label>
+                        <input type="text" name="precio" class="form-input" required placeholder="Ej: 12.000" oninput="this.value = this.value.replace(/[^0-9.,]/g, '')">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stock</label>
+                        <input type="number" name="stock" class="form-input" required placeholder="0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Categoría</label>
+                        <select name="categoria" class="form-input" required>
+                            <option value="">Selecciona una categoría</option>
+                            <option value="Bebidas">Bebidas</option>
+                            <option value="Snacks">Snacks</option>
+                            <option value="Dulces">Dulces</option>
+                            <option value="Carnes">Carnes</option>
+                            <option value="Lácteos">Lácteos</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-input">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Imagen <span style="color: var(--text-secondary); font-size: 0.85rem;">(URL o ruta local)</span></label>
+                    <input type="text" name="imagen" class="form-input" placeholder="/tienda/images/mi-imagen.jpg o https://ejemplo.com/imagen.jpg">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">
+                        ✓ Guardar Producto
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="document.getElementById('producto-modal').classList.remove('active')">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabase-config.js"></script>
     <script src="/admin/admin.js"></script>
