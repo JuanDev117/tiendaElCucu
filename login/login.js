@@ -45,8 +45,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             // Redirigir al admin en el puerto 3002
             window.location.href = `http://${hostname}:3002/admin/admin.html`;
         } else {
-            // Redirigir a la tienda en el puerto 3000
-            window.location.href = `http://${hostname}:3000/tienda/index.html`;
+            // Redirigir a la tienda en el puerto 3002
+            window.location.href = `http://${hostname}:3002/tienda/index.html`;
         }
 
     } catch (err) {

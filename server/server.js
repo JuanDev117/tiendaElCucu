@@ -298,7 +298,7 @@ app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-un tasconst server = app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Servidor Cucu corriendo en http://localhost:${PORT}`);
 });
 

@@ -45,7 +45,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         sessionStorage.setItem('cucu_token', result.access_token);
 
         setTimeout(() => {
-            window.location.href = `http://${window.location.hostname}:3000/tienda/index.html`;
+            window.location.href = `http://${window.location.hostname}:3002/tienda/index.html`;
         }, 2000);
 
     } catch (err) {
