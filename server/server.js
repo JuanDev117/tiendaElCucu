@@ -298,6 +298,14 @@ app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+un tasconst server = app.listen(PORT, () => {
     console.log(`Servidor Cucu corriendo en http://localhost:${PORT}`);
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n❌ ERROR: El puerto ${PORT} ya está en uso por otro proceso.`);
+        console.error(`Intenta cerrar otras terminales o usa: taskkill /F /PID <PID>\n`);
+        process.exit(1);
+    }
 });
