@@ -1,4 +1,8 @@
-require('dotenv').config({ path: '../.env.server' });
+const path = require('path');
+const dotenv = require('dotenv');
+const envPath = path.join(__dirname, '..', '.env.server');
+const result = dotenv.config({ path: envPath });
+if (result.error) console.error('CRÍTICO: No se pudo cargar .env.server en', envPath);
 
 const express = require('express');
 const cors = require('cors');
@@ -43,12 +47,15 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 const corsOptions = {
     origin(origin, callback) {
         // Permite peticiones sin origen (como herramientas de postman o apps móviles)
-        // o peticiones que vengan de URLs incluidas en nuestra lista blanca.
-        if (!origin || allowedOrigins.includes(origin)) {
+        // o cualquier petición que venga de localhost/127.0.0.1 para desarrollo.
+        if (!origin || 
+            allowedOrigins.includes(origin) || 
+            origin.includes('localhost') || 
+            origin.includes('127.0.0.1')) {
             return callback(null, true);
         }
 
-        console.error(`Bloqueado por CORS: ${origin}`);
+        console.error(`Acceso denegado por política CORS desde: ${origin}`);
         return callback(null, false); // Rechaza la petición si el origen no es de confianza
     },
     credentials: true,
@@ -61,63 +68,78 @@ app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email y contrasena son obligatorios.' });
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email y contrasena son obligatorios.' });
+        }
+
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            return res.status(401).json({ error: error.message });
+        }
+
+        const isAdmin = email === process.env.ADMIN_EMAIL;
+
+        return res.status(200).json({
+            message: 'Login exitoso',
+            user: {
+                id: data.user.id,
+                email: data.user.email,
+                full_name: data.user.user_metadata?.full_name || ''
+            },
+            access_token: data.session.access_token,
+            isAdmin
+        });
+    } catch (err) {
+        console.error('Error en login:', err);
+        return res.status(500).json({ error: 'Error interno del servidor al iniciar sesión' });
     }
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-        return res.status(401).json({ error: error.message });
-    }
-
-    const isAdmin = email === process.env.ADMIN_EMAIL;
-
-    return res.status(200).json({
-        message: 'Login exitoso',
-        user: {
-            id: data.user.id,
-            email: data.user.email,
-            full_name: data.user.user_metadata?.full_name || ''
-        },
-        access_token: data.session.access_token,
-        isAdmin
-    });
 });
 
 app.post('/api/registro', async (req, res) => {
-    const { email, password, name } = req.body;
+    try {
+        const { email, password, name } = req.body;
 
-    if (!email || !password || !name) {
-        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
-    }
-
-    if (password.length < 6) {
-        return res.status(400).json({ error: 'La contrasena debe tener al menos 6 caracteres.' });
-    }
-
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: { full_name: name }
+        if (!email || !password || !name) {
+            return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
         }
-    });
 
-    if (error) {
-        return res.status(400).json({ error: error.message });
-    }
-
-    return res.status(201).json({
-        message: 'Registro exitoso',
-        user: {
-            id: data.user.id,
-            email: data.user.email,
-            full_name: name
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'La contrasena debe tener al menos 6 caracteres.' });
         }
-    });
+
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { full_name: name }
+            }
+        });
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        if (!data.user) {
+            throw new Error('No se pudo crear el usuario');
+        }
+
+        return res.status(201).json({
+            message: 'Registro exitoso',
+            user: {
+                id: data.user.id,
+                email: data.user.email,
+                full_name: name
+            },
+            access_token: data.session?.access_token
+        });
+    } catch (err) {
+        console.error('Error en registro:', err);
+        return res.status(500).json({ error: err.message || 'Error interno del servidor al registrar' });
+    }
 });
 
 app.post('/api/logout', async (req, res) => {

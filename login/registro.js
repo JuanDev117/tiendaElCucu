@@ -1,5 +1,7 @@
 // ─── Configuración del servidor backend ───────────────────────
-const API_URL = 'http://127.0.0.1:3001';
+const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? `http://${window.location.hostname}:3001`
+    : '';
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -40,9 +42,10 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         
         // Guardar usuario en sessionStorage
         sessionStorage.setItem('cucu_user', JSON.stringify(result.user));
+        sessionStorage.setItem('cucu_token', result.access_token);
 
         setTimeout(() => {
-            window.location.href = 'http://127.0.0.1:3000/tienda/index.html';
+            window.location.href = `http://${window.location.hostname}:3000/tienda/index.html`;
         }, 2000);
 
     } catch (err) {

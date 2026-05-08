@@ -1,6 +1,6 @@
 // ─── Config backend ──────────────────────────────────────────
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-    ? 'http://127.0.0.1:3001'
+    ? `http://${window.location.hostname}:3001`
     : '';
 const supabaseDb = window.cucuSupabaseClient;
 
@@ -24,7 +24,8 @@ const shippingCostElement = document.getElementById('shipping-cost');
 const totalPriceElement = document.getElementById('total-price');
 const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
 const checkoutBtn = document.getElementById('checkout-btn');
-const productsGrid = document.querySelector('.products-grid');
+const destacadosGrid = document.getElementById('destacados-grid');
+const categoryResultsGrid = document.getElementById('category-results-grid');
 
 // ─── Cargar productos al iniciar ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function cargarProductos() {
     try {
         productos = await obtenerProductosActivos();
+        renderizarDestacados();
         renderizarProductos();
         setupAddToCartButtons();
     } catch (err) {
@@ -65,18 +67,48 @@ async function obtenerProductosActivos() {
     }
 }
 
+// ─── Renderizar destacados (Simulando más vendidos) ────────
+function renderizarDestacados() {
+    if (!destacadosGrid) return;
+    
+    // Como aún no tenemos columna de "ventas", mostraremos los 4 primeros
+    const destacados = productos.slice(0, 4);
+
+    destacadosGrid.innerHTML = destacados.map(producto => `
+        <div class="product-card">
+            <div class="product-image-placeholder">
+                ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : '<div style="width:100%; height:200px; background:var(--bg-secondary);"></div>'}
+            </div>
+            <div class="product-info">
+                <span class="product-category">${producto.categoria}</span>
+                <h3 class="product-name">${producto.nombre}</h3>
+                <div class="product-bottom">
+                    <span class="product-price">$${parseInt(producto.precio).toLocaleString('es-CO')}</span>
+                    <button class="add-to-cart" data-producto-id="${producto.id}">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
 // ─── Renderizar grid de productos ────────────────────────
 function renderizarProductos() {
     let productosAMostrar = productos;
 
-    // Filtrar por categoría
-    if (categoriaSeleccionada !== 'todas') {
-        productosAMostrar = productos.filter(p => p.categoria === categoriaSeleccionada);
+    // Filtrar por categoría (insensible a mayúsculas, minúsculas y espacios)
+    const filtro = categoriaSeleccionada ? categoriaSeleccionada.toLowerCase().trim() : 'todas';
+
+    if (filtro !== 'todas') {
+        productosAMostrar = productos.filter(p =>
+            p.categoria && p.categoria.toLowerCase().trim() === filtro
+        );
     }
 
     if (productosAMostrar.length === 0) {
         console.warn('No hay productos en esta categoría');
-        productsGrid.innerHTML = `
+        categoryResultsGrid.innerHTML = `
             <div class="empty-products" style="grid-column: 1 / -1;">
                 No hay productos disponibles en esta categoría.
             </div>
@@ -84,7 +116,7 @@ function renderizarProductos() {
         return;
     }
 
-    productsGrid.innerHTML = productosAMostrar.map(producto => `
+    categoryResultsGrid.innerHTML = productosAMostrar.map(producto => `
         <div class="product-card" data-producto-id="${producto.id}">
             <div class="product-image-placeholder">
                 ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : '<div style="width:100%; height:200px; background:var(--bg-secondary);"></div>'}
@@ -127,13 +159,15 @@ function setupCategoryFilters() {
             btn.classList.add('active');
             
             // Actualizar categoría seleccionada
-            categoriaSeleccionada = btn.dataset.category;
+            // Si el atributo data-category no existe, por defecto es 'todas'
+            categoriaSeleccionada = btn.getAttribute('data-category') || 'todas';
+
+            console.log(`Filtrando por: ${categoriaSeleccionada}`);
             
             // Renderizar productos filtrados
             renderizarProductos();
             
-            // Scroll suave a la sección de productos
-            document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+
         });
     });
 }

@@ -1,6 +1,6 @@
 // ─── Configuración del servidor backend ───────────────────────
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-    ? 'http://127.0.0.1:3001'
+    ? `http://${window.location.hostname}:3001`
     : '';
 const supabaseDb = window.cucuSupabaseClient;
 
