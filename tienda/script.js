@@ -7,6 +7,7 @@ const supabaseDb = window.cucuSupabaseClient;
 // Funcionalidad del carrito de compras
 let cart = [];
 let productos = [];
+let categoriaSeleccionada = 'todas';
 const deliveryCost = 3000;
 
 // Elementos del DOM
@@ -28,6 +29,7 @@ const productsGrid = document.querySelector('.products-grid');
 // ─── Cargar productos al iniciar ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
+    setupCategoryFilters();
     actualizarNavbar();
 });
 
@@ -65,17 +67,24 @@ async function obtenerProductosActivos() {
 
 // ─── Renderizar grid de productos ────────────────────────
 function renderizarProductos() {
-    if (productos.length === 0) {
-        console.warn('No hay productos para mostrar');
+    let productosAMostrar = productos;
+
+    // Filtrar por categoría
+    if (categoriaSeleccionada !== 'todas') {
+        productosAMostrar = productos.filter(p => p.categoria === categoriaSeleccionada);
+    }
+
+    if (productosAMostrar.length === 0) {
+        console.warn('No hay productos en esta categoría');
         productsGrid.innerHTML = `
-            <div class="empty-products">
-                No hay productos activos disponibles.
+            <div class="empty-products" style="grid-column: 1 / -1;">
+                No hay productos disponibles en esta categoría.
             </div>
         `;
         return;
     }
 
-    productsGrid.innerHTML = productos.map(producto => `
+    productsGrid.innerHTML = productosAMostrar.map(producto => `
         <div class="product-card" data-producto-id="${producto.id}">
             <div class="product-image-placeholder">
                 ${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.nombre}">` : '<div style="width:100%; height:200px; background:var(--bg-secondary);"></div>'}
@@ -92,6 +101,8 @@ function renderizarProductos() {
             </div>
         </div>
     `).join('');
+    
+    setupAddToCartButtons();
 }
 
 // ─── Setup botones agregar al carrito ────────────────────
@@ -100,6 +111,30 @@ function setupAddToCartButtons() {
     
     addToCartButtons.forEach(button => {
         button.addEventListener('click', agregarAlCarrito);
+    });
+}
+
+// ─── Setup filtros de categoría ──────────────────────────
+function setupCategoryFilters() {
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remover clase active de todos
+            categoryBtns.forEach(b => b.classList.remove('active'));
+            
+            // Agregar clase active al clickeado
+            btn.classList.add('active');
+            
+            // Actualizar categoría seleccionada
+            categoriaSeleccionada = btn.dataset.category;
+            
+            // Renderizar productos filtrados
+            renderizarProductos();
+            
+            // Scroll suave a la sección de productos
+            document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+        });
     });
 }
 

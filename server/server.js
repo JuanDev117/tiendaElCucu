@@ -20,10 +20,25 @@ const supabase = createClient(
  * Configuración de orígenes permitidos (CORS).
  * Si existe la variable ALLOWED_ORIGINS en el .env, la convierte en array.
  * De lo contrario, habilita los puertos de desarrollo local por defecto.
+ * 
+ * PUERTOS POR VISTA:
+ * - http://localhost:3000 → Tienda pública (index.html)
+ * - http://127.0.0.1:3000 → Tienda pública con IP local
+ * - http://localhost:5500 → Admin (admin.html) - Live Server
+ * - http://127.0.0.1:5500 → Admin (admin.html) - Live Server con IP local
+ * - http://localhost:3002 → Admin (admin.html) - Live Server (puerto alternativo)
+ * - http://127.0.0.1:3002 → Admin (admin.html) - Live Server con IP local
  */
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',') 
-    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'];
+    : [
+        'http://localhost:3000', 
+        'http://127.0.0.1:3000',
+        'http://localhost:5500', 
+        'http://127.0.0.1:5500',
+        'http://localhost:3002',
+        'http://127.0.0.1:3002'
+    ];
 
 const corsOptions = {
     origin(origin, callback) {

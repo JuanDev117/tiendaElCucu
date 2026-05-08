@@ -1,5 +1,5 @@
 // ─── Configuración del servidor backend ───────────────────────
-const API_URL = 'http://localhost:3001';
+const API_URL = 'http://127.0.0.1:3001';
 
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -42,7 +42,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         sessionStorage.setItem('cucu_user', JSON.stringify(result.user));
 
         setTimeout(() => {
-            window.location.href = '../tienda/index.html';
+            window.location.href = 'http://127.0.0.1:3000/tienda/index.html';
         }, 2000);
 
     } catch (err) {
