@@ -7,26 +7,34 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ─── CONFIGURACIÓN DE SEGURIDAD Y CONEXIONES ──────────────────────────────────
+
+// Inicialización de Supabase con la Service Role Key (Llave Maestra).
+// Se usa en el backend para tener permisos administrativos y saltarse reglas RLS.
 const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_SERVICE_KEY
 );
 
-const allowedOrigins = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:5500',
-    'http://127.0.0.1:5500',
-    'https://tiendaelcucu.vercel.app'
-];
+/**
+ * Configuración de orígenes permitidos (CORS).
+ * Si existe la variable ALLOWED_ORIGINS en el .env, la convierte en array.
+ * De lo contrario, habilita los puertos de desarrollo local por defecto.
+ */
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',') 
+    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'];
 
 const corsOptions = {
     origin(origin, callback) {
+        // Permite peticiones sin origen (como herramientas de postman o apps móviles)
+        // o peticiones que vengan de URLs incluidas en nuestra lista blanca.
         if (!origin || allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
 
-        return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+        console.error(`Bloqueado por CORS: ${origin}`);
+        return callback(null, false); // Rechaza la petición si el origen no es de confianza
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
