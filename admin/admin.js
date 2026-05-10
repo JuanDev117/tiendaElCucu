@@ -39,12 +39,32 @@ function setupEventListeners() {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             cambiarVista(item.dataset.view);
+            cerrarSidebarMobile();
         });
     });
 
     quickActions.forEach(action => {
-        action.addEventListener('click', () => cambiarVista(action.dataset.goView));
+        action.addEventListener('click', () => {
+            cambiarVista(action.dataset.goView);
+            cerrarSidebarMobile();
+        });
     });
+
+    // Sidebar toggle para móvil
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('mobile-open');
+        });
+    }
+}
+
+function cerrarSidebarMobile() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && window.innerWidth <= 768) {
+        sidebar.classList.remove('mobile-open');
+    }
 }
 
 function cambiarVista(viewName) {

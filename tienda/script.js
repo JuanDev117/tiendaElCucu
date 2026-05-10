@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
     setupCategoryFilters();
     actualizarNavbar();
+    setupSmoothScrolling(); // Nueva función para el scroll suave
+    setupMobileMenu(); // Funcionalidad para el menú móvil
 });
 
 // ─── Cargar productos del backend ────────────────────────
@@ -170,6 +172,58 @@ function setupCategoryFilters() {
 
         });
     });
+}
+
+// ─── Configurar scroll suave para enlaces del navbar ───────
+function setupSmoothScrolling() {
+    const navLinks = document.querySelectorAll('.nav-links a');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault(); // Previene el salto instantáneo
+
+            const targetId = this.getAttribute('href'); // Obtiene el ID del destino (ej. #productos)
+            let targetElement;
+
+            if (targetId === '#contacto') {
+                targetElement = document.querySelector('footer'); // Si es contacto, ve al footer
+            } else {
+                targetElement = document.querySelector(targetId); // Si no, busca el ID normal
+            }
+
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' }); // Realiza el scroll suave
+            }
+        });
+    });
+}
+
+// ─── Configurar menú móvil ────────────────────────────────
+function setupMobileMenu() {
+    const toggle = document.getElementById('mobile-menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    const navActions = document.getElementById('nav-actions');
+
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            navActions.classList.toggle('active');
+            
+            // Cambiar icono de hamburguesa a X (opcional si se desea mejorar el feedback)
+            const isActive = navLinks.classList.contains('active');
+            toggle.style.color = isActive ? 'var(--green-primary)' : 'inherit';
+        });
+
+        // Cerrar menú al hacer click en cualquier enlace (mejor UX en móvil)
+        const links = navLinks.querySelectorAll('a');
+        links.forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                navActions.classList.remove('active');
+                toggle.style.color = 'inherit';
+            });
+        });
+    }
 }
 
 // ─── Agregar al carrito ──────────────────────────────────
