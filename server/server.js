@@ -45,26 +45,33 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     ];
 
 const corsOptions = {
-    origin(origin, callback) {
-        // Permite peticiones sin origen (como herramientas de postman o apps móviles)
-        // o cualquier petición que venga de localhost/127.0.0.1 para desarrollo.
-        if (!origin || 
-            allowedOrigins.includes(origin) || 
-            origin.includes('localhost') || 
-            origin.includes('127.0.0.1')) {
-            return callback(null, true);
-        }
+    origin: function (origin, callback) {
+        // Permitir peticiones sin origen (como Postman)
+        if (!origin) return callback(null, true);
+        
+        // Permitir cualquier variante local (localhost o 127.0.0.1 con cualquier puerto)
+        const isLocal = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+        const isAllowed = allowedOrigins.includes(origin);
 
-        console.error(`Acceso denegado por política CORS desde: ${origin}`);
-        return callback(null, false); // Rechaza la petición si el origen no es de confianza
+        if (isLocal || isAllowed) {
+            callback(null, true);
+        } else {
+            callback(null, false);
+        }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+
+// Log de peticiones para depuración: Verás esto en la terminal
+app.use((req, res, next) => {
+    console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+    if (req.method !== 'GET') console.log('Body:', req.body);
+    next();
+});
+
 app.use(express.json());
 
 app.post('/api/login', async (req, res) => {
@@ -298,8 +305,8 @@ app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`Servidor Cucu corriendo en http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor Cucu corriendo en http://127.0.0.1:${PORT}`);
 });
 
 server.on('error', (err) => {

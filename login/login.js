@@ -2,7 +2,7 @@
 // Cuando corras localmente, apunta a localhost:3001.
 // En producción cambia esta URL a la de tu servidor desplegado.
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-    ? `http://${window.location.hostname}:3001`
+    ? `http://127.0.0.1:3001`
     : '';
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -37,16 +37,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         sessionStorage.setItem('cucu_user', JSON.stringify(result.user));
         sessionStorage.setItem('cucu_is_admin', result.isAdmin);
 
-        // Detectamos el host actual (localhost o 127.0.0.1)
-        const hostname = window.location.hostname;
-
         // Redirigir según el rol
         if (result.isAdmin === true || result.isAdmin === 'true') {
-            // Redirigir al admin en el puerto 3002
-            window.location.href = `http://${hostname}:3002/admin/admin.html`;
+            window.location.href = `${window.location.origin}/admin/admin.html`;
         } else {
-            // Redirigir a la tienda en el puerto 3002
-            window.location.href = `http://${hostname}:3002/tienda/index.html`;
+            window.location.href = `${window.location.origin}/tienda/index.html`;
         }
 
     } catch (err) {
