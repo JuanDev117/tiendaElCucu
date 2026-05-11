@@ -378,10 +378,88 @@ cartOverlay.addEventListener('click', () => {
     cartModal.classList.remove('active');
 });
 
-checkoutBtn.addEventListener('click', () => {
-    if(cart.length === 0) return;
-    alert('Funcionalidad de pago pendiente de integrar.');
+checkoutBtn.addEventListener('click', async () => {
+    if (cart.length === 0) return;
+    await procesarCompra();
 });
+
+async function procesarCompra() {
+    const token = sessionStorage.getItem('cucu_token');
+    const userData = sessionStorage.getItem('cucu_user');
+
+    if (!token || !userData) {
+        alert('Debes iniciar sesión para poder comprar.');
+        window.location.href = '/login/login.html';
+        return;
+    }
+
+    const user = JSON.parse(userData);
+    const isDelivery = document.querySelector('input[name="delivery"]:checked').value === 'delivery';
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const shippingCost = isDelivery ? deliveryCost : 0;
+    const total = subtotal + shippingCost;
+
+    const orderPayload = {
+        cliente_id: user.id,
+        cliente_email: user.email,
+        items: cart.map(item => ({
+            id: item.id,
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+            image: item.image
+        })),
+        subtotal,
+        shipping_cost: shippingCost,
+        total,
+        delivery: isDelivery ? 'delivery' : 'recoger',
+        status: 'pendiente',
+        created_at: new Date().toISOString()
+    };
+
+    try {
+        const response = await fetch(`${API_URL}/api/pedidos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderPayload)
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Error al generar el pedido');
+        }
+
+        alert('Pedido realizado con éxito.');
+        cart = [];
+        updateCartUI();
+        cartOverlay.classList.remove('active');
+        cartModal.classList.remove('active');
+    } catch (backendError) {
+        if (!supabaseDb) {
+            console.error(backendError);
+            alert('No se pudo completar la compra.');
+            return;
+        }
+
+        const { data, error } = await supabaseDb
+            .from('pedidos')
+            .insert([orderPayload])
+            .select()
+            .single();
+
+        if (error) {
+            console.error(error);
+            alert('No se pudo completar la compra.');
+            return;
+        }
+
+        alert('Pedido realizado con éxito.');
+        cart = [];
+        updateCartUI();
+        cartOverlay.classList.remove('active');
+        cartModal.classList.remove('active');
+    }
+}
 
 // Efecto de navbar al hacer scroll
 const navbar = document.querySelector('.navbar');

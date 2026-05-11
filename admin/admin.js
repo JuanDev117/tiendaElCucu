@@ -1,5 +1,6 @@
 // ─── Configuración del servidor backend ───────────────────────
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    ? `http://127.0.0.1:3001`
     : '';
 const supabaseDb = window.cucuSupabaseClient;
 
@@ -19,10 +20,35 @@ const quickActions = document.querySelectorAll('[data-go-view]');
 const productosTotal = document.getElementById('productos-total');
 const productosActivos = document.getElementById('productos-activos');
 const productosBajos = document.getElementById('productos-bajos');
+const ordersTableBody = document.getElementById('orders-table-body');
+const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
 
-// ─── Cargar productos al iniciar ───────────────────────────
+let pedidos = [];
+
+const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Number(price) || 0);
+};
+
+const orderStatusMap = {
+    pendiente: 'Pendiente',
+    pagado: 'Pagado',
+    despachado: 'Despachado',
+    anulado: 'Anulado',
+    cerrado: 'Cerrado'
+};
+
+const orderStatusClasses = {
+    pendiente: 'badge-warning',
+    pagado: 'badge-active',
+    despachado: 'badge-active',
+    anulado: 'badge-danger',
+    cerrado: 'badge-inactive'
+};
+
+// ─── Cargar productos y pedidos al iniciar ───────────────────
 document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
+    cargarPedidos();
     setupEventListeners();
 });
 
@@ -49,6 +75,10 @@ function setupEventListeners() {
         });
     });
 
+    if (refreshOrdersBtn) {
+        refreshOrdersBtn.addEventListener('click', cargarPedidos);
+    }
+
     // Sidebar toggle para móvil
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
@@ -69,6 +99,10 @@ function cerrarSidebarMobile() {
 function cambiarVista(viewName) {
     navItems.forEach(item => item.classList.toggle('active', item.dataset.view === viewName));
     viewPanels.forEach(panel => panel.classList.toggle('active', panel.dataset.viewPanel === viewName));
+
+    if (viewName === 'pedidos') {
+        cargarPedidos();
+    }
 }
 
 // ─── Cargar productos del backend ───────────────────────────
@@ -80,6 +114,36 @@ async function cargarProductos() {
     } catch (err) {
         console.error('Error:', err);
         alert('Error al cargar productos: ' + err.message);
+    }
+}
+
+const pedidoDePrueba = {
+    id: 'TEST-001',
+    cliente_id: 'test-client-1',
+    cliente_email: 'test@cliente.com',
+    items: [
+        { id: '1', title: 'Pony malta 330ml', price: 4000, quantity: 2 },
+        { id: '2', title: 'Salchichón cervecero', price: 12000, quantity: 1 }
+    ],
+    subtotal: 20000,
+    shipping_cost: 3000,
+    total: 23000,
+    delivery: 'delivery',
+    status: 'pendiente',
+    created_at: new Date().toISOString()
+};
+
+async function cargarPedidos() {
+    try {
+        pedidos = await obtenerPedidosAdmin();
+        if (!pedidos || pedidos.length === 0) {
+            pedidos = [pedidoDePrueba];
+        }
+        renderizarPedidos();
+    } catch (err) {
+        console.error('Error al cargar pedidos:', err);
+        pedidos = [pedidoDePrueba];
+        renderizarPedidos();
     }
 }
 
@@ -98,6 +162,103 @@ async function obtenerProductosAdmin() {
 
         if (error) throw error;
         return data || [];
+    }
+}
+
+async function obtenerPedidosAdmin() {
+    try {
+        const response = await fetch(`${API_URL}/api/pedidos`);
+        if (!response.ok) throw new Error('Backend no disponible');
+        return await response.json();
+    } catch (backendError) {
+        if (!supabaseDb) throw backendError;
+
+        const { data, error } = await supabaseDb
+            .from('pedidos')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+}
+
+function renderizarPedidos() {
+    if (!ordersTableBody) return;
+    ordersTableBody.innerHTML = '';
+
+    if (!pedidos || pedidos.length === 0) {
+        ordersTableBody.innerHTML = `
+            <tr>
+                <td colspan="6"><div class="empty-state">Aun no hay pedidos registrados.</div></td>
+            </tr>
+        `;
+        return;
+    }
+
+    pedidos.forEach(pedido => {
+        const status = pedido.status || 'pendiente';
+        const statusLabel = orderStatusMap[status] || status;
+        const badgeClass = orderStatusClasses[status] || 'badge-inactive';
+        const deliveryLabel = pedido.delivery === 'delivery' ? 'Domicilio' : 'Recoger';
+        const createdAt = pedido.created_at ? new Date(pedido.created_at).toLocaleString('es-CO') : '';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>
+                <strong>#${pedido.id || ''}</strong><br>
+                <small>${createdAt}</small>
+            </td>
+            <td>${pedido.cliente_email || 'Cliente desconocido'}</td>
+            <td>${formatPrice(pedido.total)}</td>
+            <td>${deliveryLabel}</td>
+            <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+            <td>
+                <select class="status-select" onchange="cambiarEstadoPedido('${pedido.id}', this.value)">
+                    ${Object.keys(orderStatusMap).map(key => `
+                        <option value="${key}" ${key === status ? 'selected' : ''}>${orderStatusMap[key]}</option>
+                    `).join('')}
+                </select>
+            </td>
+        `;
+        ordersTableBody.appendChild(row);
+    });
+}
+
+window.cambiarEstadoPedido = async (id, status) => {
+    try {
+        const response = await fetch(`${API_URL}/api/pedidos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'No se pudo actualizar el estado');
+
+        cargarPedidos();
+    } catch (backendError) {
+        if (!supabaseDb) {
+            console.warn('No hay backend disponible, actualizando estado localmente para pruebas');
+            pedidos = pedidos.map(p => p.id === id ? { ...p, status } : p);
+            renderizarPedidos();
+            return;
+        }
+
+        const { data, error } = await supabaseDb
+            .from('pedidos')
+            .update({ status })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error(error);
+            alert('No se pudo actualizar el estado del pedido');
+            return;
+        }
+
+        cargarPedidos();
     }
 }
 
@@ -323,18 +484,67 @@ async function persistirProducto(datos, tipo) {
     }
 }
 
+let productoAEliminarId = null;
+
 // ─── Eliminar producto ────────────────────────────────────
-async function eliminarProducto(id) {
+function eliminarProducto(id) {
+    productoAEliminarId = id;
+    mostrarConfirmEliminar(id);
+}
+
+function mostrarConfirmEliminar(id) {
     const producto = productos.find(p => String(p.id) === String(id));
-    
-    if (!confirm(`¿Estás seguro de que deseas eliminar "${producto.nombre}"?`)) {
-        return;
-    }
+    const modal = document.getElementById('confirm-delete-modal');
+    const mensaje = modal.querySelector('.confirm-text');
+    const botonConfirmar = document.getElementById('confirm-delete-btn');
+
+    mensaje.textContent = producto
+        ? `¿Estás seguro de que deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.`
+        : '¿Estás seguro de que deseas eliminar este producto?';
+
+    botonConfirmar.onclick = async () => {
+        await confirmarEliminarProducto();
+    };
+
+    modal.classList.add('active');
+}
+
+function cerrarConfirmEliminar() {
+    productoAEliminarId = null;
+    const modal = document.getElementById('confirm-delete-modal');
+    modal.classList.remove('active');
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">✓</div>
+        <div class="toast-text">${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('hide');
+    }, 3000);
+
+    toast.addEventListener('transitionend', () => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+    });
+}
+
+async function confirmarEliminarProducto() {
+    if (!productoAEliminarId) return;
 
     try {
-        await borrarProducto(id);
+        await borrarProducto(productoAEliminarId);
 
-        alert('Producto eliminado exitosamente');
+        cerrarConfirmEliminar();
+        showToast('Producto eliminado exitosamente', 'success');
         cargarProductos();
     } catch (err) {
         console.error('Error:', err);

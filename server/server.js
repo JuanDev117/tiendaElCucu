@@ -64,6 +64,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Log de peticiones para depuración: Verás esto en la terminal
 app.use((req, res, next) => {
@@ -296,6 +297,83 @@ app.delete('/api/productos/:id', async (req, res) => {
         }
 
         return res.status(200).json({ message: 'Producto eliminado exitosamente' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/pedidos', async (_req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('pedidos')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json(data || []);
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/pedidos', async (req, res) => {
+    try {
+        const { cliente_id, cliente_email, items, subtotal, shipping_cost, total, delivery, status } = req.body;
+
+        if (!cliente_id || !cliente_email || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ error: 'Los datos del pedido son incompletos.' });
+        }
+
+        const { data, error } = await supabase
+            .from('pedidos')
+            .insert([{
+                cliente_id,
+                cliente_email,
+                items,
+                subtotal,
+                shipping_cost,
+                total,
+                delivery: delivery || 'recoger',
+                status: status || 'pendiente',
+                created_at: new Date().toISOString()
+            }])
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(201).json({ message: 'Pedido creado exitosamente', pedido: data });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/pedidos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+        return res.status(400).json({ error: 'El estado del pedido es obligatorio.' });
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('pedidos')
+            .update({ status })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json({ message: 'Estado actualizado correctamente', pedido: data });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
