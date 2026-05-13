@@ -2,7 +2,7 @@
 // Cuando corras localmente, apunta a localhost:3001.
 // En producción cambia esta URL a la de tu servidor desplegado.
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-    ? `http://127.0.0.1:3001`
+    ? `http://127.0.0.1:3002`
     : '';
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
