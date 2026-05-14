@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "kill": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :3001') do taskkill /F /PID %a"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",

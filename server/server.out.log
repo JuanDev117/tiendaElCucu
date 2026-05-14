@@ -1,0 +1,5 @@
+
+> cucu-backend@1.0.0 start
+> node server.js
+
+Servidor Cucu corriendo en http://127.0.0.1:3002

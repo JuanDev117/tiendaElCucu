@@ -6,10 +6,38 @@ if (result.error) console.error('CRÍTICO: No se pudo cargar .env.server en', en
 
 const express = require('express');
 const cors = require('cors');
+const { execSync } = require('child_process');//mata el puerto antes de inciarlo 
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+/**
+ * Libera el puerto si está ocupado antes de iniciar.
+ * En Windows usa netstat para encontrar el PID y lo mata con taskkill.
+ */
+function liberarPuerto(port) {
+    try {
+        const output = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf8' });
+        const lines = output.trim().split('\n');
+        const listenLine = lines.find(l => l.includes('LISTENING'));
+        if (!listenLine) return;
+
+        const parts = listenLine.trim().split(/\s+/);
+        const pid = parts[parts.length - 1];
+
+        if (pid && pid !== '0') {
+            console.log(`⚠️  Puerto ${port} ocupado por PID ${pid}. Liberando...`);
+            execSync(`taskkill /F /PID ${pid}`, { encoding: 'utf8' });
+            console.log(`✅ Puerto ${port} liberado correctamente.`);
+            // Pequeña pausa para que el SO libere el puerto
+            const start = Date.now();
+            while (Date.now() - start < 500) {}
+        }
+    } catch (_) {
+        // Puerto libre o sin permisos — se intenta iniciar normalmente
+    }
+}
 
 // ─── CONFIGURACIÓN DE SEGURIDAD Y CONEXIONES ──────────────────────────────────
 
@@ -383,14 +411,17 @@ app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Liberar puerto automáticamente antes de arrancar
+liberarPuerto(PORT);
+
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor Cucu corriendo en http://127.0.0.1:${PORT}`);
+    console.log(`\n🚀 Servidor Cucu corriendo en http://127.0.0.1:${PORT}`);
+    console.log(`📅 ${new Date().toLocaleString('es-CO')}\n`);
 });
 
 server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-        console.error(`\n❌ ERROR: El puerto ${PORT} ya está en uso por otro proceso.`);
-        console.error(`Intenta cerrar otras terminales o usa: taskkill /F /PID <PID>\n`);
+        console.error(`\n❌ No se pudo liberar el puerto ${PORT}. Intenta reiniciar la terminal.\n`);
         process.exit(1);
     }
 });
