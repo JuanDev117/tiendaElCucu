@@ -2,7 +2,7 @@
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? `http://127.0.0.1:3002`
     : '';
-const WHATSAPP_NUMBER = "57"; // Cambia esto por tu número de WhatsApp (con código de país)
+const WHATSAPP_NUMBER = "573207248739"; // Cambia esto por tu número de WhatsApp (con código de país)
 const supabaseDb = window.cucuSupabaseClient;
 
 // Funcionalidad del carrito de compras
