@@ -26,14 +26,35 @@ const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
 const checkoutBtn = document.getElementById('checkout-btn');
 const destacadosGrid = document.getElementById('destacados-grid');
 const categoryResultsGrid = document.getElementById('category-results-grid');
+const splashScreen = document.getElementById('splash-screen');
+
+// ─── Lógica del Splash Screen ─────────────────────────────
+function hideSplash() {
+    if (splashScreen) {
+        setTimeout(() => {
+            splashScreen.classList.add('hidden');
+            document.body.classList.remove('loading');
+        }, 2000); // Mínimo 2 segundos para apreciar la animación
+    }
+}
+
+// Bloquear scroll mientras carga
+document.body.classList.add('loading');
 
 // ─── Cargar productos al iniciar ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    cargarProductos();
+    cargarProductos().then(() => {
+        // Ocultar splash cuando los productos terminen de cargar
+        hideSplash();
+    }).catch(() => {
+        // Si hay error, ocultar de todos modos para dejar entrar al usuario
+        hideSplash();
+    });
+    
     setupCategoryFilters();
     actualizarNavbar();
-    setupSmoothScrolling(); // Nueva función para el scroll suave
-    setupMobileMenu(); // Funcionalidad para el menú móvil
+    setupSmoothScrolling(); 
+    setupMobileMenu(); 
 });
 
 // ─── Cargar productos del backend ────────────────────────

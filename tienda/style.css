@@ -1,3 +1,10 @@
+/* Scrollbar Custom */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; border: 3px solid #000; }
+::-webkit-scrollbar-thumb:hover { background: #22c55e; }
+* { scrollbar-width: thin; scrollbar-color: #222 #000; }
+
 :root {
     --bg-color: #000000;
     --text-primary: #ffffff;
@@ -837,3 +844,79 @@ footer p {
     color: var(--green-primary);
 }
 
+/* ====================== */
+/* SPLASH SCREEN STYLES   */
+/* ====================== */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.8s;
+}
+
+.splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    animation: splashFadeIn 1s ease forwards;
+}
+
+.splash-logo .logo-text {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    animation: logoPulse 2s infinite ease-in-out;
+}
+
+.splash-loader {
+    width: 200px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.loader-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--green-primary);
+    box-shadow: 0 0 15px var(--green-glow);
+    animation: loaderProgress 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes splashFadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes logoPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+@keyframes loaderProgress {
+    0% { width: 0%; }
+    30% { width: 40%; }
+    60% { width: 70%; }
+    100% { width: 100%; }
+}
+
+/* Prevent scroll when splash is active */
+body.loading {
+    overflow: hidden;
+}
