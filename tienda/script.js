@@ -2,6 +2,7 @@
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? `http://127.0.0.1:3002`
     : '';
+const WHATSAPP_NUMBER = "573000000000"; // Cambia esto por tu número de WhatsApp (con código de país)
 const supabaseDb = window.cucuSupabaseClient;
 
 // Funcionalidad del carrito de compras
@@ -416,6 +417,15 @@ async function procesarCompra() {
 
     const user = JSON.parse(userData);
     const isDelivery = document.querySelector('input[name="delivery"]:checked').value === 'delivery';
+    const addressInput = document.getElementById('order-address');
+    const direccion = addressInput ? addressInput.value.trim() : '';
+
+    if (isDelivery && !direccion) {
+        alert('Por favor, ingresa una dirección para el domicilio.');
+        addressInput.focus();
+        return;
+    }
+
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shippingCost = isDelivery ? deliveryCost : 0;
     const total = subtotal + shippingCost;
@@ -423,6 +433,7 @@ async function procesarCompra() {
     const orderPayload = {
         cliente_id: user.id,
         cliente_email: user.email,
+        direccion,
         items: cart.map(item => ({
             id: item.id,
             title: item.title,
@@ -450,7 +461,9 @@ async function procesarCompra() {
             throw new Error(result.error || 'Error al generar el pedido');
         }
 
-        alert('Pedido realizado con éxito.');
+        alert('Pedido realizado con éxito. Redirigiendo a WhatsApp...');
+        enviarAWhatsApp(orderPayload);
+        
         cart = [];
         updateCartUI();
         cartOverlay.classList.remove('active');
@@ -474,12 +487,41 @@ async function procesarCompra() {
             return;
         }
 
-        alert('Pedido realizado con éxito.');
+        alert('Pedido realizado con éxito. Redirigiendo a WhatsApp...');
+        enviarAWhatsApp(orderPayload);
+
         cart = [];
         updateCartUI();
         cartOverlay.classList.remove('active');
         cartModal.classList.remove('active');
     }
+}
+
+// ─── Función para enviar mensaje a WhatsApp ──────────────
+function enviarAWhatsApp(order) {
+    const formattedTotal = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(order.total);
+    
+    let message = `*NUEVO PEDIDO - EL CUCU*\n\n`;
+    message += `👤 *Cliente:* ${order.cliente_email}\n`;
+    message += `📦 *Entrega:* ${order.delivery === 'delivery' ? 'Domicilio' : 'Recoger en tienda'}\n`;
+    
+    if (order.direccion) {
+        message += `📍 *Dirección:* ${order.direccion}\n`;
+    }
+    
+    message += `──────────────────\n`;
+    
+    order.items.forEach(item => {
+        message += `• ${item.quantity}x ${item.title} - $${parseInt(item.price * item.quantity).toLocaleString('es-CO')}\n`;
+    });
+    
+    message += `──────────────────\n`;
+    message += `💰 *TOTAL A PAGAR: ${formattedTotal}*`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
 }
 
 // Efecto de navbar al hacer scroll

@@ -210,6 +210,7 @@ function renderizarPedidos() {
                 <small>${createdAt}</small>
             </td>
             <td>${pedido.cliente_email || 'Cliente desconocido'}</td>
+            <td><small>${pedido.direccion || '-'}</small></td>
             <td>${formatPrice(pedido.total)}</td>
             <td>${deliveryLabel}</td>
             <td><span class="badge ${badgeClass}">${statusLabel}</span></td>

@@ -349,7 +349,7 @@ app.get('/api/pedidos', async (_req, res) => {
 
 app.post('/api/pedidos', async (req, res) => {
     try {
-        const { cliente_id, cliente_email, items, subtotal, shipping_cost, total, delivery, status } = req.body;
+        const { cliente_id, cliente_email, items, subtotal, shipping_cost, total, delivery, status, direccion } = req.body;
 
         if (!cliente_id || !cliente_email || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ error: 'Los datos del pedido son incompletos.' });
@@ -366,6 +366,7 @@ app.post('/api/pedidos', async (req, res) => {
                 total,
                 delivery: delivery || 'recoger',
                 status: status || 'pendiente',
+                direccion: direccion || '',
                 created_at: new Date().toISOString()
             }])
             .select()
