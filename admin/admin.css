@@ -492,6 +492,15 @@
     font-weight: 500;
 }
 
+.td-product img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: #000;
+    border: 1px solid var(--border-color);
+}
+
 .mini-placeholder {
     width: 36px;
     height: 36px;
@@ -558,6 +567,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2rem;
 }
 
 .action-btn:hover {
@@ -693,6 +703,10 @@
     color: var(--text-primary);
     font-size: 0.95rem;
 }
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
     margin-top: 28px;
 }
 
@@ -1448,4 +1462,96 @@
         padding: 8px 10px;
         font-size: 13px;
     }
+}
+
+/* --- Detalle de Pedido --- */
+.order-detail-body {
+    padding: 1rem 0;
+}
+
+.detail-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+}
+
+.detail-section h3 {
+    font-size: 0.9rem;
+    color: var(--green-primary);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.info-item p {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.order-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.order-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.order-item-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.order-item-qty {
+    background: var(--green-glow);
+    color: var(--green-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.order-item-name {
+    font-weight: 500;
+}
+
+.order-item-price {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.order-total-summary {
+    margin-top: 1rem;
+    text-align: right;
+    font-size: 1.1rem;
+}
+
+.order-total-summary strong {
+    color: var(--green-primary);
+    font-size: 1.25rem;
 }

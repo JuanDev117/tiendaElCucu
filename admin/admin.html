@@ -78,16 +78,16 @@
                             <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
                             <div class="stat-details">
                                 <h3>Ingresos del dia</h3>
-                                <p class="stat-value">$0</p>
-                                <span class="stat-trend positive">Pendiente de pedidos</span>
+                                <p class="stat-value" id="ingresos-dia">$0</p>
+                                <span class="stat-trend positive" id="ingresos-tendencia">Pendiente de pedidos</span>
                             </div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
                             <div class="stat-details">
                                 <h3>Pedidos hoy</h3>
-                                <p class="stat-value">0</p>
-                                <span class="stat-trend positive">Sin pedidos nuevos</span>
+                                <p class="stat-value" id="pedidos-hoy">0</p>
+                                <span class="stat-trend positive" id="pedidos-tendencia">Sin pedidos nuevos</span>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -155,7 +155,7 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody id="products-table-body"></tbody>
                             </table>
                         </div>
                     </div>
@@ -167,12 +167,21 @@
                             <p class="page-kicker">Ventas</p>
                             <h1 class="page-title">Pedidos</h1>
                         </div>
-                        <button class="btn btn-secondary">Exportar</button>
+                        <div class="header-actions">
+                            <button id="btn-exportar-pedidos" class="btn btn-secondary">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Exportar Excel
+                            </button>
+                            <button id="btn-limpiar-pedidos" class="btn btn-outline-danger">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Limpiar pedidos
+                            </button>
+                        </div>
                     </div>
                     <div class="product-toolbar">
-                        <div class="toolbar-card"><span>Pendientes</span><strong>0</strong></div>
-                        <div class="toolbar-card"><span>En camino</span><strong>0</strong></div>
-                        <div class="toolbar-card"><span>Completados</span><strong>0</strong></div>
+                        <div class="toolbar-card"><span>Pendientes</span><strong id="pedidos-pendientes">0</strong></div>
+                        <div class="toolbar-card"><span>En camino</span><strong id="pedidos-camino">0</strong></div>
+                        <div class="toolbar-card"><span>Completados</span><strong id="pedidos-completados">0</strong></div>
                     </div>
                     <div class="admin-table-container">
                         <div class="table-header">
@@ -298,19 +307,35 @@
         </div>
     </div>
 
-    <!-- Modal de confirmación de eliminación -->
-    <div id="confirm-delete-modal" class="modal-overlay" onclick="if (event.target === this) cerrarConfirmEliminar()">
+    <!-- Modal de confirmación genérico -->
+    <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content confirm-modal">
             <div class="modal-header">
-                <h2 class="modal-title">Eliminar producto</h2>
-                <button type="button" class="modal-close" onclick="cerrarConfirmEliminar()">×</button>
+                <h2 id="confirm-title" class="modal-title">Confirmar acción</h2>
+                <button type="button" class="modal-close" onclick="cerrarConfirmacion()">×</button>
             </div>
             <div class="confirm-body">
-                <p class="confirm-text">¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.</p>
+                <p id="confirm-text" class="confirm-text">¿Estás seguro de realizar esta acción?</p>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="cerrarConfirmEliminar()">Cancelar</button>
-                <button type="button" class="btn-save btn-danger" id="confirm-delete-btn">Eliminar</button>
+                <button type="button" class="btn-cancel" onclick="cerrarConfirmacion()">Cancelar</button>
+                <button type="button" class="btn-save" id="confirm-action-btn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalle de Pedido -->
+    <div id="order-detail-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalle del Pedido</h2>
+                <button type="button" class="modal-close" onclick="document.getElementById('order-detail-modal').classList.remove('active')">×</button>
+            </div>
+            <div id="order-detail-content" class="order-detail-body">
+                <!-- Se llena dinámicamente -->
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="document.getElementById('order-detail-modal').classList.remove('active')">Cerrar</button>
             </div>
         </div>
     </div>
@@ -318,6 +343,13 @@
     <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/supabase-config.js"></script>
-    <script src="/admin/admin.js"></script>
+
+    <!-- Módulos Admin -->
+    <script src="/admin/js/config.js"></script>
+    <script src="/admin/js/utils.js"></script>
+    <script src="/admin/js/ui.js"></script>
+    <script src="/admin/js/inventory.js"></script>
+    <script src="/admin/js/sales.js"></script>
+    <script src="/admin/js/main.js"></script>
 </body>
 </html>

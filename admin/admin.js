@@ -23,6 +23,15 @@ const productosBajos = document.getElementById('productos-bajos');
 const ordersTableBody = document.getElementById('orders-table-body');
 const refreshOrdersBtn = document.getElementById('refresh-orders-btn');
 
+// Stats Pedidos
+const pedidosPendientes = document.getElementById('pedidos-pendientes');
+const pedidosCamino = document.getElementById('pedidos-camino');
+const pedidosCompletados = document.getElementById('pedidos-completados');
+const ingresosDia = document.getElementById('ingresos-dia');
+const pedidosHoyCount = document.getElementById('pedidos-hoy');
+const ingresosTendencia = document.getElementById('ingresos-tendencia');
+const pedidosTendencia = document.getElementById('pedidos-tendencia');
+
 let pedidos = [];
 
 const formatPrice = (price) => {
@@ -31,18 +40,18 @@ const formatPrice = (price) => {
 
 const orderStatusMap = {
     pendiente: 'Pendiente',
-    pagado: 'Pagado',
-    despachado: 'Despachado',
+    en_camino: 'En Camino',
+    entregado: 'Entregado',
     anulado: 'Anulado',
-    cerrado: 'Cerrado'
+    pagado: 'Pagado'
 };
 
 const orderStatusClasses = {
     pendiente: 'badge-warning',
-    pagado: 'badge-active',
-    despachado: 'badge-active',
+    en_camino: 'badge-active',
+    entregado: 'badge-inactive',
     anulado: 'badge-danger',
-    cerrado: 'badge-inactive'
+    pagado: 'badge-active'
 };
 
 // ─── Cargar productos y pedidos al iniciar ───────────────────
@@ -78,6 +87,13 @@ function setupEventListeners() {
     if (refreshOrdersBtn) {
         refreshOrdersBtn.addEventListener('click', cargarPedidos);
     }
+
+    // Exportar y Limpiar
+    const btnExportar = document.getElementById('btn-exportar-pedidos');
+    const btnLimpiar = document.getElementById('btn-limpiar-pedidos');
+
+    if (btnExportar) btnExportar.addEventListener('click', exportarPedidosAExcel);
+    if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarPedidos);
 
     // Sidebar toggle para móvil
     const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -136,13 +152,14 @@ const pedidoDePrueba = {
 async function cargarPedidos() {
     try {
         pedidos = await obtenerPedidosAdmin();
-        if (!pedidos || pedidos.length === 0) {
-            pedidos = [pedidoDePrueba];
+        // Si no hay pedidos y estamos en local, podemos cargar el de prueba
+        if ((!pedidos || pedidos.length === 0) && window.location.hostname === 'localhost') {
+            // pedidos = [pedidoDePrueba]; // Opcional: descomentar para ver datos de prueba
         }
         renderizarPedidos();
+        actualizarEstadisticasPedidos();
     } catch (err) {
         console.error('Error al cargar pedidos:', err);
-        pedidos = [pedidoDePrueba];
         renderizarPedidos();
     }
 }
@@ -260,6 +277,41 @@ window.cambiarEstadoPedido = async (id, status) => {
         }
 
         cargarPedidos();
+    }
+}
+
+function actualizarEstadisticasPedidos() {
+    if (!pedidos) return;
+
+    // 1. Estadísticas de la vista de Pedidos
+    const pendientes = pedidos.filter(p => p.status === 'pendiente').length;
+    const camino = pedidos.filter(p => p.status === 'en_camino').length;
+    const completados = pedidos.filter(p => p.status === 'entregado').length;
+
+    if (pedidosPendientes) pedidosPendientes.textContent = pendientes;
+    if (pedidosCamino) pedidosCamino.textContent = camino;
+    if (pedidosCompletados) pedidosCompletados.textContent = completados;
+
+    // 2. Estadísticas del Dashboard (Hoy)
+    const hoy = new Date().toLocaleDateString();
+    const pedidosDeHoy = pedidos.filter(p => {
+        if (!p.created_at) return false;
+        return new Date(p.created_at).toLocaleDateString() === hoy;
+    });
+
+    const ingresosDeHoy = pedidosDeHoy.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+
+    if (ingresosDia) ingresosDia.textContent = formatPrice(ingresosDeHoy);
+    if (pedidosHoyCount) pedidosHoyCount.textContent = pedidosDeHoy.length;
+
+    // Actualizar tendencias/mensajes
+    if (ingresosTendencia) {
+        ingresosTendencia.textContent = ingresosDeHoy > 0 ? 'Ingresos generados hoy' : 'Esperando ventas...';
+    }
+    if (pedidosTendencia) {
+        pedidosTendencia.textContent = pedidosDeHoy.length > 0 
+            ? `${pedidosDeHoy.length} pedido(s) hoy` 
+            : 'Sin actividad hoy';
     }
 }
 
@@ -487,33 +539,52 @@ async function persistirProducto(datos, tipo) {
 
 let productoAEliminarId = null;
 
-// ─── Eliminar producto ────────────────────────────────────
-function eliminarProducto(id) {
-    productoAEliminarId = id;
-    mostrarConfirmEliminar(id);
-}
+// ─── Modal de Confirmación Genérico ─────────────────────────
+function openConfirmModal({ title, text, onConfirm, confirmText = 'Confirmar', danger = false }) {
+    const modal = document.getElementById('confirm-modal');
+    const titleEl = document.getElementById('confirm-title');
+    const textEl = document.getElementById('confirm-text');
+    const actionBtn = document.getElementById('confirm-action-btn');
 
-function mostrarConfirmEliminar(id) {
-    const producto = productos.find(p => String(p.id) === String(id));
-    const modal = document.getElementById('confirm-delete-modal');
-    const mensaje = modal.querySelector('.confirm-text');
-    const botonConfirmar = document.getElementById('confirm-delete-btn');
+    titleEl.textContent = title;
+    textEl.textContent = text;
+    actionBtn.textContent = confirmText;
+    
+    // Estilo del botón (peligro o normal)
+    actionBtn.className = danger ? 'btn-save btn-danger' : 'btn-save';
 
-    mensaje.textContent = producto
-        ? `¿Estás seguro de que deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.`
-        : '¿Estás seguro de que deseas eliminar este producto?';
-
-    botonConfirmar.onclick = async () => {
-        await confirmarEliminarProducto();
+    actionBtn.onclick = () => {
+        onConfirm();
+        cerrarConfirmacion();
     };
 
     modal.classList.add('active');
 }
 
+window.cerrarConfirmacion = () => {
+    const modal = document.getElementById('confirm-modal');
+    if (modal) modal.classList.remove('active');
+};
+
+// ─── Eliminar producto ────────────────────────────────────
+function eliminarProducto(id) {
+    const producto = productos.find(p => String(p.id) === String(id));
+    
+    openConfirmModal({
+        title: 'Eliminar producto',
+        text: producto 
+            ? `¿Estás seguro de que deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.`
+            : '¿Estás seguro de que deseas eliminar este producto?',
+        confirmText: 'Eliminar',
+        danger: true,
+        onConfirm: async () => {
+            await confirmarEliminarProducto(id);
+        }
+    });
+}
+
 function cerrarConfirmEliminar() {
-    productoAEliminarId = null;
-    const modal = document.getElementById('confirm-delete-modal');
-    modal.classList.remove('active');
+    cerrarConfirmacion();
 }
 
 function showToast(message, type = 'success') {
@@ -538,13 +609,11 @@ function showToast(message, type = 'success') {
     });
 }
 
-async function confirmarEliminarProducto() {
-    if (!productoAEliminarId) return;
+async function confirmarEliminarProducto(id) {
+    if (!id) return;
 
     try {
-        await borrarProducto(productoAEliminarId);
-
-        cerrarConfirmEliminar();
+        await borrarProducto(id);
         showToast('Producto eliminado exitosamente', 'success');
         cargarProductos();
     } catch (err) {
@@ -576,5 +645,107 @@ async function borrarProducto(id) {
 
         if (error) throw error;
         return { message: 'Producto eliminado exitosamente' };
+    }
+}
+
+// ─── Exportar Pedidos a Excel (CSV) ─────────────────────────
+function exportarPedidosAExcel() {
+    if (!pedidos || pedidos.length === 0) {
+        alert('No hay pedidos para exportar.');
+        return;
+    }
+
+    // Definir encabezados
+    let csvContent = "ID;Fecha;Cliente;Direccion;Total;Metodo;Estado;Items\n";
+
+    // Recorrer pedidos y agregar filas
+    pedidos.forEach(p => {
+        const fecha = p.created_at ? new Date(p.created_at).toLocaleString('es-CO').replace(/,/g, '') : '';
+        const itemsResumen = p.items ? p.items.map(i => `${i.quantity}x ${i.title}`).join(' | ') : '';
+        
+        const fila = [
+            p.id,
+            fecha,
+            p.cliente_email,
+            (p.direccion || '').replace(/;/g, ','), // Evitar romper el CSV
+            p.total,
+            p.delivery,
+            p.status,
+            `"${itemsResumen}"`
+        ];
+
+        csvContent += fila.join(";") + "\n";
+    });
+
+    // Crear el archivo y descargarlo
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    
+    const fechaArchivo = new Date().toLocaleDateString().replace(/\//g, '-');
+    link.setAttribute("href", url);
+    link.setAttribute("download", `pedidos_cucu_${fechaArchivo}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('Archivo Excel generado con éxito', 'success');
+}
+
+// ─── Limpiar Todos los Pedidos ──────────────────────────────
+async function limpiarPedidos() {
+    // 1. Primer aviso estilizado
+    openConfirmModal({
+        title: '⚠️ Atención',
+        text: '¿Seguro que quieres limpiar todos los pedidos? Esta acción no se puede deshacer.',
+        confirmText: 'Sí, continuar',
+        danger: true,
+        onConfirm: () => {
+            // 2. Segundo aviso estilizado (verificar exportación)
+            setTimeout(() => {
+                openConfirmModal({
+                    title: '🧐 Verificación',
+                    text: '¿Ya exportaste los datos de los pedidos a Excel? Es recomendable hacerlo antes de borrar.',
+                    confirmText: 'Sí, ya exporté',
+                    danger: false,
+                    onConfirm: ejecutarLimpiezaFinal
+                });
+            }, 300); // Pequeño delay para que se sienta fluido
+        }
+    });
+}
+
+async function ejecutarLimpiezaFinal() {
+    try {
+        const response = await fetch(`${API_URL}/api/pedidos/all`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'No se pudo limpiar la tabla');
+
+        showToast('Historial de pedidos limpiado', 'success');
+        cargarPedidos();
+    } catch (backendError) {
+        if (!supabaseDb) {
+            alert('Error: ' + backendError.message);
+            return;
+        }
+
+        const { error } = await supabaseDb
+            .from('pedidos')
+            .delete()
+            .neq('id', -1);
+
+        if (error) {
+            console.error(error);
+            alert('No se pudo limpiar la base de datos');
+            return;
+        }
+
+        showToast('Historial de pedidos limpiado (Supabase)', 'success');
+        cargarPedidos();
     }
 }

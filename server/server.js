@@ -408,6 +408,23 @@ app.put('/api/pedidos/:id', async (req, res) => {
     }
 });
 
+app.delete('/api/pedidos/all', async (req, res) => {
+    try {
+        const { error } = await supabase
+            .from('pedidos')
+            .delete()
+            .neq('id', -1); // Truco para borrar todo en Supabase si no hay filtro
+
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+
+        return res.status(200).json({ message: 'Todos los pedidos han sido eliminados.' });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
