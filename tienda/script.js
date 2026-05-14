@@ -2,7 +2,7 @@
 const API_URL = ['localhost', '127.0.0.1'].includes(window.location.hostname)
     ? `http://127.0.0.1:3002`
     : '';
-const WHATSAPP_NUMBER = "573000000000"; // Cambia esto por tu número de WhatsApp (con código de país)
+const WHATSAPP_NUMBER = "57"; // Cambia esto por tu número de WhatsApp (con código de país)
 const supabaseDb = window.cucuSupabaseClient;
 
 // Funcionalidad del carrito de compras
@@ -27,31 +27,36 @@ const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
 const checkoutBtn = document.getElementById('checkout-btn');
 const destacadosGrid = document.getElementById('destacados-grid');
 const categoryResultsGrid = document.getElementById('category-results-grid');
-const splashScreen = document.getElementById('splash-screen');
+// ─── Notificaciones Toast ───────────────────────────────
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
 
-// ─── Lógica del Splash Screen ─────────────────────────────
-function hideSplash() {
-    if (splashScreen) {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    let icon = '';
+    if (type === 'success') icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    if (type === 'error') icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-text">${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('out');
         setTimeout(() => {
-            splashScreen.classList.add('hidden');
-            document.body.classList.remove('loading');
-        }, 2000); // Mínimo 2 segundos para apreciar la animación
-    }
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+    }, 4000);
 }
-
-// Bloquear scroll mientras carga
-document.body.classList.add('loading');
 
 // ─── Cargar productos al iniciar ──────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-    cargarProductos().then(() => {
-        // Ocultar splash cuando los productos terminen de cargar
-        hideSplash();
-    }).catch(() => {
-        // Si hay error, ocultar de todos modos para dejar entrar al usuario
-        hideSplash();
-    });
-    
+    cargarProductos();
     setupCategoryFilters();
     actualizarNavbar();
     setupSmoothScrolling(); 
@@ -257,7 +262,7 @@ async function agregarAlCarrito(e) {
     const session = sessionStorage.getItem('cucu_token');
     
     if (!session) {
-        alert("Debes iniciar sesión para poder comprar.");
+        showToast("Debes iniciar sesión para poder comprar.", "error");
         window.location.href = '/login/login.html';
         return;
     }
@@ -267,7 +272,7 @@ async function agregarAlCarrito(e) {
     const producto = productos.find(p => p.id == productoId);
 
     if (!producto) {
-        alert('Producto no encontrado');
+        showToast('Producto no encontrado', 'error');
         return;
     }
 
@@ -367,24 +372,14 @@ window.removeFromCart = (id) => {
 // Calcular totales
 function calculateTotals() {
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    // Revisar opción de envío
-    const isDelivery = document.querySelector('input[name="delivery"]:checked').value === 'delivery';
-    const currentShippingCost = isDelivery ? deliveryCost : 0;
-    
-    const total = subtotal + currentShippingCost;
+    const total = subtotal + deliveryCost;
 
     subtotalElement.textContent = formatPrice(subtotal);
-    shippingCostElement.textContent = isDelivery ? formatPrice(currentShippingCost) : 'Gratis';
+    shippingCostElement.textContent = formatPrice(deliveryCost);
     totalPriceElement.textContent = formatPrice(total);
 }
 
-// Eventos de envío
-deliveryRadios.forEach(radio => {
-    radio.addEventListener('change', calculateTotals);
-});
-
-// Abrir / Cerrar Carrito
+// ─── Abrir / Cerrar Carrito ─────────────────────────────
 cartBtn.addEventListener('click', () => {
     cartOverlay.classList.add('active');
     cartModal.classList.add('active');
@@ -410,7 +405,7 @@ async function procesarCompra() {
     const userData = sessionStorage.getItem('cucu_user');
 
     if (!token || !userData) {
-        alert('Debes iniciar sesión para poder comprar.');
+        showToast('Debes iniciar sesión para poder comprar.', 'error');
         window.location.href = '/login/login.html';
         return;
     }
@@ -421,7 +416,7 @@ async function procesarCompra() {
     const direccion = addressInput ? addressInput.value.trim() : '';
 
     if (isDelivery && !direccion) {
-        alert('Por favor, ingresa una dirección para el domicilio.');
+        showToast('Por favor, ingresa una dirección para el domicilio', 'error');
         addressInput.focus();
         return;
     }
@@ -461,7 +456,7 @@ async function procesarCompra() {
             throw new Error(result.error || 'Error al generar el pedido');
         }
 
-        alert('Pedido realizado con éxito. Redirigiendo a WhatsApp...');
+        showToast('Pedido realizado con éxito. Redirigiendo a WhatsApp...', 'success');
         enviarAWhatsApp(orderPayload);
         
         cart = [];
@@ -471,7 +466,7 @@ async function procesarCompra() {
     } catch (backendError) {
         if (!supabaseDb) {
             console.error(backendError);
-            alert('No se pudo completar la compra.');
+            showToast('No se pudo completar la compra.', 'error');
             return;
         }
 
@@ -483,11 +478,11 @@ async function procesarCompra() {
 
         if (error) {
             console.error(error);
-            alert('No se pudo completar la compra.');
+            showToast('No se pudo completar la compra.', 'error');
             return;
         }
 
-        alert('Pedido realizado con éxito. Redirigiendo a WhatsApp...');
+        showToast('Pedido realizado con éxito. Redirigiendo a WhatsApp...', 'success');
         enviarAWhatsApp(orderPayload);
 
         cart = [];
