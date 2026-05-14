@@ -94,20 +94,24 @@ function enviarAWhatsApp(order) {
     const formatCOP = (n) =>
         new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n);
 
-    let message = `*NUEVO PEDIDO — EL CUCU* 🛒\n\n`;
-    message += `👤 *Cliente:* ${order.cliente_email}\n`;
-    message += `🚚 *Entrega:* Domicilio\n`;
-    message += `📍 *Dirección:* ${order.direccion}\n`;
-    message += `──────────────────\n`;
-
+    let message = ` *NUEVO PEDIDO - TIENDA EL CUCU* 🛒\n\n`;
+    message += `*DATOS DEL CLIENTE*\n`;
+    message += ` *Email:* ${order.cliente_email}\n`;
+    message += ` *Dirección:* ${order.direccion}\n`;
+    message += ` *Método:* Domicilio\n\n`;
+    
+    message += ` *PRODUCTOS:* \n`;
+    
     order.items.forEach(item => {
-        message += `• ${item.quantity}x ${item.title} — ${formatCOP(item.price * item.quantity)}\n`;
+        message += ` ${item.quantity}x ${item.title} - ${formatCOP(item.price * item.quantity)}\n`;
     });
-
-    message += `──────────────────\n`;
-    message += `📦 Subtotal: ${formatCOP(order.subtotal)}\n`;
-    message += `🛵 Envío:    ${formatCOP(order.shipping_cost)}\n`;
-    message += `💰 *TOTAL: ${formatCOP(order.total)}*`;
+    
+    message += `\n *RESUMEN DE PAGO*\n`;
+    message += `Subtotal: ${formatCOP(order.subtotal)}\n`;
+    message += ` Envío: ${formatCOP(order.shipping_cost)}\n`;
+    message += ` *TOTAL A PAGAR: ${formatCOP(order.total)}*\n\n`;
+    
+    message += ` *¡Muchas gracias por tu compra!*`;
 
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
